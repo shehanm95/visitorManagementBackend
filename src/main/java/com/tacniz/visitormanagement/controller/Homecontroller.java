@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class Homecontroller {
 
-    private final JwtService jwtService;
+
 
     @GetMapping("")
     public String home(){
@@ -18,13 +18,4 @@ public class Homecontroller {
     }
 
 
-    @PostMapping("/login")
-    public String login(){
-        return jwtService.getJWTToken();
-    }
-
-    @GetMapping("/username")
-    public String getUsername(@RequestParam String token) {
-        return jwtService.getUsername(token);
-    }
 }
