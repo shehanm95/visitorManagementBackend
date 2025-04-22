@@ -1,42 +1,37 @@
 package com.tacniz.visitormanagement.service;
 
-import com.tacniz.visitormanagement.model.MyUser;
-import com.tacniz.visitormanagement.service.userService.MyUserService;
-import lombok.RequiredArgsConstructor;
+
+import com.tacniz.visitormanagement.model.UserEntity;
+import com.tacniz.visitormanagement.repo.UserEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Collection;
+import java.util.List;
 
 @Service
 public class MyUserDetailsService implements UserDetailsService {
-
-    @Lazy
     @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Lazy
-    @Autowired
-    private MyUserService myUserService;
-
-
+    private UserEntityRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        MyUser myUser = myUserService.getUserByEmail(email);
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return new org.springframework.security.core.userdetails.User(
+                user.getEmail(),
+                user.getPassword(),
+                getAuthority(user)
+        );
+    }
 
-        if (myUser == null) {
-            throw new UsernameNotFoundException("User not found with email: " + email);
-        }
-
-        return User.builder()
-                .username(myUser.getEmail())
-                .password(myUser.getPassword()) // Make sure this is already encoded in DB
-                .roles(myUser.getUserRole().name()) // Spring Security uses roles for authorization
-                .build();
+    private Collection<? extends GrantedAuthority> getAuthority(UserEntity user) {
+        GrantedAuthority authority = new SimpleGrantedAuthority(user.getRole().name());
+        return List.of(authority);
     }
 }
-
