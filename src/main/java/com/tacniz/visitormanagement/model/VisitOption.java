@@ -1,11 +1,12 @@
 package com.tacniz.visitormanagement.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "visits")
+@Table(name = "visitOptions")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,7 +22,7 @@ public class VisitOption {
     private String visitOptionName;
 
     @ManyToOne
-    @JoinColumn(name = "visitType", referencedColumnName = "id")
+    @JoinColumn(name = "visitType", referencedColumnName = "id", nullable = false)
     private VisitType visitType;
 
     @Column(name = "description")
@@ -31,10 +32,10 @@ public class VisitOption {
     private Boolean isPreRegistration;
 
 //    @Column(name = "preRegistration")
-//    private PreeRegistration preRegistrationType; // Enum or String (e.g., "allWorkingD", "specificDay", "range")
+//    private PreRegistration preRegistrationObj; // Enum or String (e.g., "allWorkingD", "specificDay", "range")
 
-    @Column(name = "coverimage")
-    private String coverImage;
+    @Column(name = "imagePath")
+    private String imageName;
 
     @Column(name = "isPhotoRequired")
     private Boolean isPhotoRequired;
@@ -48,9 +49,7 @@ public class VisitOption {
     @Column(name = "isEmailRequired")
     private Boolean isEmailRequired;
 
-    @ManyToOne
-    @JoinColumn(name = "visitor", referencedColumnName = "id")
-    private UserEntity visitor;
+
 
 //    @ManyToOne
 //    @JoinColumn(name = "allWorkingDays", referencedColumnName = "id")

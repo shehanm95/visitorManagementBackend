@@ -22,14 +22,14 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest request) {
-        // Save the new user to the database and return success response.
-        authService.registerUser(request);
-        return ResponseEntity.ok("User registered successfully");
+        // Save the new user to the database and return success tokens.
+        return ResponseEntity.ok(authService.registerUser(request));
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
         TokenPair tokenPair = authService.login(loginRequest);
+        System.out.println("tokens got : " + tokenPair);
         return ResponseEntity.ok(tokenPair);
     }
 

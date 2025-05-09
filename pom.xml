@@ -110,12 +110,11 @@
 <!--			<version>0.12.6</version>-->
 <!--		</dependency>-->
 
-<!--		&lt;!&ndash; https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui &ndash;&gt;-->
-<!--		<dependency>-->
-<!--			<groupId>org.springdoc</groupId>-->
-<!--			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>-->
-<!--			<version>2.8.5</version>-->
-<!--		</dependency>-->
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.8.5</version>
+		</dependency>
 
 <!--&lt;!&ndash;		========missings&ndash;&gt;-->
 <!--		&lt;!&ndash; Caching support &ndash;&gt;-->
@@ -213,6 +212,20 @@
 						</exclude>
 					</excludes>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.6.3</version>
+				<executions>
+					<execution>
+						<id>generate-javadoc</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

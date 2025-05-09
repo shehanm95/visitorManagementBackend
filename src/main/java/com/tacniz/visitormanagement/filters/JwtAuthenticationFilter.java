@@ -44,10 +44,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         jwt = getJwtFromRequest(request);
 
         // check if the token is valid
-        if(!jwtService.isValidToken(jwt)) {
-            filterChain.doFilter(request, response);
+        if (!jwtService.isValidToken(jwt)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Invalid or expired token");
             return;
         }
+
 
         username = jwtService.extractUsernameFromToken(jwt);
 

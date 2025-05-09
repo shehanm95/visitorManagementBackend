@@ -1,12 +1,15 @@
-package com.tacniz.visitormanagement.service;
+package com.tacniz.visitormanagement.service.impl;
 
 
 import com.tacniz.visitormanagement.dto.LoginRequest;
 import com.tacniz.visitormanagement.dto.RefreshTokenRequest;
 import com.tacniz.visitormanagement.dto.RegisterRequest;
 import com.tacniz.visitormanagement.dto.TokenPair;
+import com.tacniz.visitormanagement.model.Role;
 import com.tacniz.visitormanagement.model.UserEntity;
 import com.tacniz.visitormanagement.repo.UserEntityRepository;
+import com.tacniz.visitormanagement.service.AuthService;
+import com.tacniz.visitormanagement.service.JwtService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -21,7 +24,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
-public class AuthServiceImpl {
+public class AuthServiceImpl  implements AuthService {
 
     private final UserEntityRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -41,14 +44,16 @@ public class AuthServiceImpl {
                 .builder()
                 .firstName(registerRequest.getFirstName())
                 .lastName(registerRequest.getLastName())
+                .imagePath(registerRequest.getImagePath())
                 .email(registerRequest.getEmail())
+                .phoneNumber(registerRequest.getPhoneNumber())
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
-                .role(registerRequest.getRole())
+                .role(Role.ROLE_VISITOR)
                 .build();
 
         userRepository.save(user);
         return login(new LoginRequest(registerRequest.getEmail(), registerRequest.getPassword()));
-       // return null;
+
     }
 
     public TokenPair login(LoginRequest loginRequest) {
@@ -63,7 +68,7 @@ public class AuthServiceImpl {
 
         // Set authentication in security context
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
+        System.out.println("Authenticated");
         // Generate Token Pair
         return jwtService.generateTokenPair(authentication);
     }

@@ -23,15 +23,18 @@ public class RegisterRequest {
 
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
+    @Size(max = 255, message = "Email must not exceed 255 characters")
     private String email;
+
+    private String imagePath;
+
+    @NotBlank(message = "Phone number is required")
+    @Size(min = 10, max = 10, message = "Phone number must be between 5 and 50 characters")
+    private String phoneNumber;
 
     @NotBlank(message = "Password is required")
     @Size(min = 8, message = "Password must be at least 8 characters")
     private String password;
 
-    @NotBlank(message = "Confirm password is required")
-    @Size(min = 8, message = "Confirm password must be at least 8 characters")
-    private String confirmPassword;
-
-    private Role role = Role.ROLE_VISITOR; // Default role
+    private Role role = Role.ROLE_VISITOR;
 }

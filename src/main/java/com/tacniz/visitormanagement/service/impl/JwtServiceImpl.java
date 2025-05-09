@@ -1,7 +1,8 @@
-package com.tacniz.visitormanagement.service;
+package com.tacniz.visitormanagement.service.impl;
 
 
 import com.tacniz.visitormanagement.dto.TokenPair;
+import com.tacniz.visitormanagement.service.JwtService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -20,7 +21,7 @@ import java.util.Map;
 
 @Service
 @Slf4j
-public class JwtServiceImpl  {
+public class JwtServiceImpl implements JwtService {
 
     @Value("${app.jwt.secret}")
     private String jwtSecret;
