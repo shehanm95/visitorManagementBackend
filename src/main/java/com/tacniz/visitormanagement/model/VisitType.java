@@ -29,6 +29,6 @@ public class VisitType {
     private String imageName;
 
     @OneToMany(mappedBy = "visitType", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
+
     private List<VisitOption> visitOptions;
 }

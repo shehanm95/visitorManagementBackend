@@ -23,6 +23,7 @@ public class VisitOption {
 
     @ManyToOne
     @JoinColumn(name = "visitType", referencedColumnName = "id", nullable = false)
+    @JsonIgnore
     private VisitType visitType;
 
     @Column(name = "description")

@@ -39,7 +39,7 @@ public class VisitOptionServiceImpl implements VisitOptionService {
                 .orElseThrow(() -> new IllegalArgumentException("VisitType not found with id: " + visitOptionDTO.getVisitType().getId()));
 
         VisitOption visitOption = objectMapper.convertValue(visitOptionDTO, VisitOption.class);
-
+        visitOption.setVisitType(visitType);
         visitOption = visitOptionRepository.save(visitOption);
 
         //saving image

@@ -3,8 +3,8 @@ package com.tacniz.visitormanagement.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -16,4 +16,5 @@ public class VisitTypeDTO {
     private String visitTypeDescription;
     private String imageName;
     private MultipartFile image;
+    private List<VisitOptionDTO> visitOptions;
 }
