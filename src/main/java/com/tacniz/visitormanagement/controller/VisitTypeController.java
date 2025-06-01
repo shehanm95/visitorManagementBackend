@@ -23,7 +23,6 @@ public class VisitTypeController {
 
     private final VisitTypeService visitTypeService;
     private final ObjectMapper objectMapper;
-    private final ImageService imageService;
 
     // Create
     @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

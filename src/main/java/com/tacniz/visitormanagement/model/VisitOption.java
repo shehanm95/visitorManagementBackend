@@ -1,12 +1,13 @@
 package com.tacniz.visitormanagement.model;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
-@Table(name = "visitOptions")
+@Table(name = "visit_options") // ✅ Updated to snake_case
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,43 +15,44 @@ import lombok.*;
 public class VisitOption {
 
     @Id
-    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "visitOptionName")
+    @Column(name = "visit_option_name") // ✅ snake_case
     private String visitOptionName;
 
-    @ManyToOne
-    @JoinColumn(name = "visitType", referencedColumnName = "id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "visit_type", referencedColumnName = "id", nullable = false) // ✅ FK fix
     @JsonIgnore
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private VisitType visitType;
 
     @Column(name = "description")
     private String description;
 
-    @Column(name = "isPreRegistration")
+    @Column(name = "is_pre_registration")
     private Boolean isPreRegistration;
 
-//    @Column(name = "preRegistration")
-//    private PreRegistration preRegistrationObj; // Enum or String (e.g., "allWorkingD", "specificDay", "range")
-
-    @Column(name = "imagePath")
+    @Column(name = "image_path")
     private String imageName;
 
-    @Column(name = "isPhotoRequired")
+    @Column(name = "is_photo_required")
     private Boolean isPhotoRequired;
 
-    @Column(name = "isPhotoOptional")
+    @Column(name = "is_photo_optional")
     private Boolean isPhotoOptional;
 
-    @Column(name = "isPhoneNumberRequired")
+    @Column(name = "is_phone_number_required")
     private Boolean isPhoneNumberRequired;
 
-    @Column(name = "isEmailRequired")
+    @Column(name = "is_email_required")
     private Boolean isEmailRequired;
 
-
+    @OneToMany(mappedBy = "visitOption", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+//    @ToString.Exclude
+//    @EqualsAndHashCode.Exclude
+    private List<DynamicQuestion> dynamicQuestions;
 
 //    @ManyToOne
 //    @JoinColumn(name = "allWorkingDays", referencedColumnName = "id")
@@ -63,10 +65,6 @@ public class VisitOption {
 //    @ManyToOne
 //    @JoinColumn(name = "dateRange", referencedColumnName = "id")
 //    private DateRange dateRange;
-//
-//    @ManyToOne
-//    @JoinColumn(name = "DynamicQuestions", referencedColumnName = "id")
-//    private DynamicQuestions dynamicQuestions;
 //
 //    @ManyToOne
 //    @JoinColumn(name = "servicePoints", referencedColumnName = "id")

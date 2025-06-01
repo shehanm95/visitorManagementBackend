@@ -6,6 +6,8 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -43,4 +45,6 @@ public class VisitOptionDTO {
 
     @JsonIgnore
     private MultipartFile image;
+
+    private List<DynamicQuestionDTO> dynamicQuestions;
 }

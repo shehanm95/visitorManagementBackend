@@ -17,6 +17,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,6 +41,7 @@ public class VisitOptionServiceImpl implements VisitOptionService {
 
         VisitOption visitOption = objectMapper.convertValue(visitOptionDTO, VisitOption.class);
         visitOption.setVisitType(visitType);
+        visitOption.setDynamicQuestions(Collections.emptyList());
         visitOption = visitOptionRepository.save(visitOption);
 
         //saving image

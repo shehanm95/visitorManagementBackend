@@ -1,4 +1,4 @@
-package com.tacniz.visitormanagement.mapper.impl.;
+package com.tacniz.visitormanagement.mapper.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tacniz.visitormanagement.dto.ButtonAnswerDTO;
@@ -30,7 +30,7 @@ public class DynamicQuestionMapperImpl implements DynamicQuestionMapper {
             return null;
         }
 
-        // Use ObjectMapper to map basic fields
+        System.out.println(dto);
         DynamicQuestion entity = objectMapper.convertValue(dto, DynamicQuestion.class);
         entity.setAnswerType(dto.getAnswerType() != null ? AnswerType.valueOf(dto.getAnswerType()) : null);
 

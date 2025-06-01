@@ -3,6 +3,7 @@ package com.tacniz.visitormanagement.mapper.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tacniz.visitormanagement.dto.VisitOptionDTO;
 import com.tacniz.visitormanagement.dto.VisitTypeDTO;
+import com.tacniz.visitormanagement.mapper.DynamicQuestionMapper;
 import com.tacniz.visitormanagement.mapper.VisitOptionMapper;
 import com.tacniz.visitormanagement.model.VisitOption;
 import com.tacniz.visitormanagement.model.VisitType;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 public class VisitOptionMapperImpl implements VisitOptionMapper {
     private final ObjectMapper objectMapper;
     private final VisitTypeRepo visitTypeRepo;
+    private final DynamicQuestionMapper dynamicQuestionMapper;
     @Override
     public VisitOption toEntity (VisitOptionDTO visitOptionDTO){
         if(visitOptionDTO == null) return null;
@@ -29,6 +31,9 @@ public class VisitOptionMapperImpl implements VisitOptionMapper {
         VisitOptionDTO visitOptionDTO = objectMapper.convertValue(visitOptionEntity, VisitOptionDTO.class);
         VisitType visitType = visitTypeRepo.findById(visitOptionDTO.getVisitType().getId()).orElseThrow( ()->new IllegalArgumentException("visit type not found"));
         visitOptionDTO.setVisitType(objectMapper.convertValue(visitType, VisitTypeDTO.class));
+        visitOptionDTO.setDynamicQuestions(visitOptionEntity.getDynamicQuestions().stream().map(dynamicQuestionMapper::toDto).toList());
+        System.out.println(visitOptionDTO.getDynamicQuestions());
+        System.out.println("visitOptionDTO.getDynamicQuestions()");
         return visitOptionDTO;
     }
 }

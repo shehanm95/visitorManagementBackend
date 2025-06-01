@@ -7,7 +7,7 @@ import lombok.*;
 import java.util.List;
 
 @Entity
-@Table(name = "VisitType")
+@Table(name = "visit_type")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,16 +19,17 @@ public class VisitType {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "visitTypeName")
+    @Column(name = "visit_type_name")
     private String visitTypeName;
 
-    @Column(name = "visitTypeDescription")
+    @Column(name = "visit_type_description")
     private String visitTypeDescription;
 
-    @Column(name = "imagePath")
+    @Column(name = "image_path")
     private String imageName;
 
-    @OneToMany(mappedBy = "visitType", cascade = CascadeType.ALL, orphanRemoval = true)
-
+    @OneToMany(mappedBy = "visitType", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<VisitOption> visitOptions;
 }

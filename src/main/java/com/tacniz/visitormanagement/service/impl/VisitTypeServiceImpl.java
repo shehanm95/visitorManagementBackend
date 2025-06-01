@@ -2,6 +2,7 @@ package com.tacniz.visitormanagement.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tacniz.visitormanagement.dto.VisitTypeDTO;
+import com.tacniz.visitormanagement.mapper.VisitTypeMapper;
 import com.tacniz.visitormanagement.model.VisitType;
 import com.tacniz.visitormanagement.repo.VisitTypeRepo;
 import com.tacniz.visitormanagement.service.ImageService;
@@ -25,6 +26,7 @@ public class VisitTypeServiceImpl implements VisitTypeService {
 
     private final VisitTypeRepo visitTypeRepository;
     private final ImageService imageService;
+    private final VisitTypeMapper visitTypeMapper;
 
 
 
@@ -58,7 +60,7 @@ public class VisitTypeServiceImpl implements VisitTypeService {
     @Override
     public List<VisitTypeDTO> getAllVisitTypes() {
         return visitTypeRepository.findAll().stream()
-                .map(type-> objectMapper.convertValue(type,VisitTypeDTO.class))
+                .map(visitTypeMapper::toDto)
                 .collect(Collectors.toList());
     }
 
