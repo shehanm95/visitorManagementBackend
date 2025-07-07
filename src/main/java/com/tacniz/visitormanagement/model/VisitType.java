@@ -29,7 +29,9 @@ public class VisitType {
     private String imageName;
 
     @OneToMany(mappedBy = "visitType", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
+//    @ToString.Exclude
+//    @EqualsAndHashCode.Exclude
     private List<VisitOption> visitOptions;
+
+    private boolean isActive = false;
 }

@@ -33,6 +33,7 @@ public class VisitOptionController {
         VisitOptionDTO visitOptionDTO = objectMapper.readValue(visitOptionJson, VisitOptionDTO.class);
         visitOptionDTO.setImage(coverImage);
         VisitOptionDTO createdVisitOption = visitOptionService.createVisitOption(visitOptionDTO);
+        System.out.println(createdVisitOption);
         return new ResponseEntity<>(createdVisitOption, HttpStatus.CREATED);
     }
 
@@ -85,5 +86,19 @@ public class VisitOptionController {
     public ResponseEntity<Void> deleteVisitOption(@PathVariable Long id) {
         visitOptionService.deleteVisitOption(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/activeByType/{visitTypeId}")
+    public ResponseEntity<List<VisitOptionDTO>> getActiveVisitOptionsByVisitTypeId(
+            @PathVariable Long visitTypeId) {
+        List<VisitOptionDTO> activeVisitOptions =
+                visitOptionService.getActiveVisitOptionsByVisitTypeId(visitTypeId);
+        return ResponseEntity.ok(activeVisitOptions);
+    }
+
+    @GetMapping("/getAllPreRegActiveOptionsByType/{id}")
+    public ResponseEntity<List<VisitOptionDTO>> ActiveAllPreRegOptionsByTypeId(@PathVariable Long id){
+        return ResponseEntity.ok(visitOptionService.ActiveAllPreRegOptionsByTypeId(id));
+
     }
 }

@@ -23,4 +23,8 @@ public interface VisitOptionService {
     ResponseEntity<Resource> getImage(String filename);
 
    VisitOptionDTO deleteCover(String fileName);
+
+    List<VisitOptionDTO> getActiveVisitOptionsByVisitTypeId(Long visitTypeId);
+
+    public List<VisitOptionDTO> ActiveAllPreRegOptionsByTypeId(Long visitTypeId);
 }

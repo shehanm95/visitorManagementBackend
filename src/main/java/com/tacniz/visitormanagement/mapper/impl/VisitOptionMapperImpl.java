@@ -32,8 +32,6 @@ public class VisitOptionMapperImpl implements VisitOptionMapper {
         VisitType visitType = visitTypeRepo.findById(visitOptionDTO.getVisitType().getId()).orElseThrow( ()->new IllegalArgumentException("visit type not found"));
         visitOptionDTO.setVisitType(objectMapper.convertValue(visitType, VisitTypeDTO.class));
         visitOptionDTO.setDynamicQuestions(visitOptionEntity.getDynamicQuestions().stream().map(dynamicQuestionMapper::toDto).toList());
-        System.out.println(visitOptionDTO.getDynamicQuestions());
-        System.out.println("visitOptionDTO.getDynamicQuestions()");
         return visitOptionDTO;
     }
 }

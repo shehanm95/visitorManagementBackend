@@ -1,7 +1,7 @@
 package com.tacniz.visitormanagement.repo;
 
-import com.tacniz.visitormanagement.model.SpecificDates;
+import com.tacniz.visitormanagement.model.SpecificDate;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface SpecificDatesRepo extends JpaRepository<SpecificDates,Long> {
+public interface SpecificDateRepo extends JpaRepository<SpecificDate,Long> {
 }

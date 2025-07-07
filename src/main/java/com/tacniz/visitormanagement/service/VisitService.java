@@ -11,4 +11,11 @@ public interface VisitService {
     void deleteVisit(Long id);
     List<VisitDto> getVisitsByVisitOptionId(Long visitOptionId);
     List<VisitDto> getVisitsByVisitorUserId(Long visitorUserId);
+
+    List<VisitDto> getAll();
+
+
+    List<VisitDto> getByRowId(Long id);
+
+    void markAsPrinted(Long id);
 }

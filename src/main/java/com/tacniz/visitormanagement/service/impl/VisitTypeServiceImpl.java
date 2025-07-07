@@ -7,6 +7,7 @@ import com.tacniz.visitormanagement.model.VisitType;
 import com.tacniz.visitormanagement.repo.VisitTypeRepo;
 import com.tacniz.visitormanagement.service.ImageService;
 import com.tacniz.visitormanagement.service.VisitTypeService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -115,5 +117,18 @@ public class VisitTypeServiceImpl implements VisitTypeService {
     @Override
     public ResponseEntity<Resource> getImage(String filename) {
         return imageService.getImage(MAIN_DIRECTORY,filename);
+    }
+
+
+    @Override
+    public List<VisitTypeDTO> getVisitTypesWithPreRegistration() {
+        return visitTypeRepository.findVisitTypesWithPreRegistrationOptions()
+                .stream()
+                .map(t->{
+                    VisitTypeDTO typeDTO= objectMapper.convertValue(t,VisitTypeDTO.class);
+                    typeDTO.setVisitOptions(new ArrayList<>());
+                    return typeDTO;
+                })
+                .collect(Collectors.toList());
     }
 }

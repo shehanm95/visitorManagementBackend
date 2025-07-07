@@ -1,5 +1,6 @@
 package com.tacniz.visitormanagement.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -7,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -55,9 +57,10 @@ public class UserEntity {
     @Column(name = "user_role", nullable = false)
     private Role role; // Updated to match the schema field name
 
-//    // Relationships based on foreign keys
-//    @OneToMany(mappedBy = "visitor")
-//    private List<Visit> visits; // FK1: visits
+
+    @OneToMany(mappedBy = "visitor")
+    @JsonIgnore
+    private List<Visit> visits = new ArrayList<>();
 
 //    @ManyToOne
 //    @JoinColumn(name = "service_points_as_moderator") // FK1: servicePoints (as moderator)

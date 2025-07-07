@@ -18,7 +18,7 @@ public class DynamicQuestion {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "visit_option_id", nullable = true)
+    @JoinColumn(name = "visit_option_id", nullable = false)
     @JsonIgnore
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

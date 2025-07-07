@@ -5,10 +5,14 @@ import com.tacniz.visitormanagement.dto.ButtonAnswerDTO;
 import com.tacniz.visitormanagement.dto.DynamicQuestionDTO;
 import com.tacniz.visitormanagement.mapper.ButtonAnswerMapper;
 import com.tacniz.visitormanagement.mapper.DynamicQuestionMapper;
+import com.tacniz.visitormanagement.mapper.VisitOptionMapper;
 import com.tacniz.visitormanagement.model.AnswerType;
 import com.tacniz.visitormanagement.model.ButtonAnswer;
 import com.tacniz.visitormanagement.model.DynamicQuestion;
+import com.tacniz.visitormanagement.model.VisitOption;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -17,12 +21,10 @@ import java.util.stream.Collectors;
 
 @Component
 public class DynamicQuestionMapperImpl implements DynamicQuestionMapper {
-
     @Autowired
-    private ButtonAnswerMapper buttonAnswerMapper;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+    private  ButtonAnswerMapper buttonAnswerMapper;
+   @Autowired
+    private  ObjectMapper objectMapper;
 
     @Override
     public DynamicQuestion toEntity(DynamicQuestionDTO dto) {
@@ -30,22 +32,22 @@ public class DynamicQuestionMapperImpl implements DynamicQuestionMapper {
             return null;
         }
 
-        System.out.println(dto);
-        DynamicQuestion entity = objectMapper.convertValue(dto, DynamicQuestion.class);
-        entity.setAnswerType(dto.getAnswerType() != null ? AnswerType.valueOf(dto.getAnswerType()) : null);
+        DynamicQuestion dynamicQuestion = objectMapper.convertValue(dto, DynamicQuestion.class);
+        dynamicQuestion.setVisitOption(objectMapper.convertValue(dto.getVisitOption(), VisitOption.class));
+        dynamicQuestion.setAnswerType(dto.getAnswerType() != null ? AnswerType.valueOf(dto.getAnswerType()) : null);
 
         // Map buttonAnswers and set the bidirectional relationship
         if (dto.getButtonAnswers() != null) {
             List<ButtonAnswer> buttonAnswers = dto.getButtonAnswers().stream()
                     .map(buttonAnswerMapper::toEntity)
-                    .peek(buttonAnswer -> buttonAnswer.setDynamicQuestion(entity))
+                    .peek(buttonAnswer -> buttonAnswer.setDynamicQuestion(dynamicQuestion))
                     .collect(Collectors.toList());
-            entity.setButtonAnswers(buttonAnswers);
+            dynamicQuestion.setButtonAnswers(buttonAnswers);
         } else {
-            entity.setButtonAnswers(Collections.emptyList());
+            dynamicQuestion.setButtonAnswers(Collections.emptyList());
         }
 
-        return entity;
+        return dynamicQuestion;
     }
 
     @Override

@@ -1,10 +1,13 @@
 package com.tacniz.visitormanagement.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tacniz.visitormanagement.dto.DynamicQuestionDTO;
+import com.tacniz.visitormanagement.dto.VisitTypeDTO;
 import com.tacniz.visitormanagement.mapper.DynamicQuestionMapper;
 import com.tacniz.visitormanagement.model.DynamicQuestion;
 import com.tacniz.visitormanagement.repo.DynamicQuestionRepository;
 import com.tacniz.visitormanagement.service.DynamicQuestionService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,13 +15,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class DynamicQuestionServiceImpl implements DynamicQuestionService {
 
-    @Autowired
-    private DynamicQuestionRepository repository;
 
-    @Autowired
-    private DynamicQuestionMapper mapper;
+    private final DynamicQuestionRepository repository;
+    private final ObjectMapper objectMapper;
+
+
+    private final DynamicQuestionMapper mapper;
 
     @Override
     public List<DynamicQuestionDTO> getQuestionsByVisitOptionId(Long visitOptionId) {
@@ -37,13 +42,13 @@ public class DynamicQuestionServiceImpl implements DynamicQuestionService {
     @Override
     public DynamicQuestionDTO getQuestionById(Long id) {
         DynamicQuestion question = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Question not found with id: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Question not found with id: " + id));
         return mapper.toDto(question);
     }
 
     @Override
     public DynamicQuestionDTO updateQuestion(DynamicQuestionDTO updatedQuestion) {
-        if(updatedQuestion.getId() == null) throw new IllegalArgumentException("id not exist in the Dynamic Question");
+       if(updatedQuestion.getId() == null) throw new IllegalArgumentException("id not exist in the Dynamic Question");
        DynamicQuestion dynamicQuestion = repository.findById(updatedQuestion.getId()).orElseThrow(()-> new IllegalArgumentException("Dynamic Question not found in the database"));
        dynamicQuestion = mapper.toEntity(updatedQuestion);
        return mapper.toDto(repository.save(dynamicQuestion));

@@ -91,4 +91,9 @@ public class VisitTypeController {
             default -> "application/octet-stream";
         };
     }
+
+    @GetMapping("/visitTypesWithPreRegistration")
+    public ResponseEntity<List<VisitTypeDTO>> getVisitTypesWithPreRegistration(){
+        return ResponseEntity.ok(visitTypeService.getVisitTypesWithPreRegistration());
+    }
 }

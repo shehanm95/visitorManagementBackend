@@ -1,15 +1,17 @@
 package com.tacniz.visitormanagement.dto;
 
 import jakarta.validation.constraints.*;
+import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Data
+@Builder
 public class DynamicQuestionDTO {
 
-    private Long id;
+    private Long id =0L;
 
     @NotNull(message = "visit option cannot be null")
     private VisitOptionDTO visitOption;

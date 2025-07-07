@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface VisitOptionRepository extends JpaRepository<VisitOption, Long> {
     List<VisitOption> findByVisitTypeId(Long visitTypeId);
+    List<VisitOption> findByVisitTypeIdAndIsActiveTrue(Long visitTypeId);
+    List<VisitOption> findByVisitTypeIdAndIsPreRegistrationTrueAndIsActiveTrue(Long visitTypeId);
 }

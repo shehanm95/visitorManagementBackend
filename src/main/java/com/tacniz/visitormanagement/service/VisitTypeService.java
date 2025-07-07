@@ -23,4 +23,8 @@ public interface VisitTypeService {
     VisitType deleteCover(String filename);
 
     ResponseEntity<Resource> getImage(String filename);
+
+
+    public List<VisitTypeDTO> getVisitTypesWithPreRegistration();
+
 }

@@ -1,11 +1,14 @@
 package com.tacniz.visitormanagement.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.tacniz.visitormanagement.model.VisitType;
+import com.tacniz.visitormanagement.model.SpecificDate;
+import com.tacniz.visitormanagement.model.VisitDateType;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -47,4 +50,19 @@ public class VisitOptionDTO {
     private MultipartFile image;
 
     private List<DynamicQuestionDTO> dynamicQuestions;
+
+    private int averageTimeForAPerson;
+    private int visitorsPerRow;
+    private boolean active =false;
+
+
+    // holds visit appointments visitors placed
+    private List<VisitRowDto> visitRows = new ArrayList<>();
+
+    // keeps the times ranges that times visitors can create visits,
+    private List<TimeRangeDto> timeRanges = new ArrayList<>();
+
+    private VisitDateType visitDateType;
+    private List<SpecificDate> specificDates;
+
 }

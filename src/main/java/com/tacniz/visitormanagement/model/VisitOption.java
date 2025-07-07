@@ -1,13 +1,16 @@
 package com.tacniz.visitormanagement.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.tacniz.visitormanagement.dto.SpecificDateDto;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "visit_options") // ✅ Updated to snake_case
+@Table(name = "visit_options")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,11 +21,11 @@ public class VisitOption {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "visit_option_name") // ✅ snake_case
+    @Column(name = "visit_option_name")
     private String visitOptionName;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "visit_type", referencedColumnName = "id", nullable = false) // ✅ FK fix
+    @JoinColumn(name = "visit_type", referencedColumnName = "id", nullable = false)
     @JsonIgnore
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
@@ -49,23 +52,34 @@ public class VisitOption {
     @Column(name = "is_email_required")
     private Boolean isEmailRequired;
 
-    @OneToMany(mappedBy = "visitOption", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "visitOption", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<DynamicQuestion> dynamicQuestions = new ArrayList<>();
+
+    private int averageTimeForAPerson;
+    private int visitorsPerRow;
+
+    private boolean isActive;
+
+    @OneToMany(mappedBy = "visitOption")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<VisitRow> visitRows = new ArrayList<>();
+
+    @OneToMany(mappedBy = "visitOption", cascade = CascadeType.ALL, orphanRemoval = true)
 //    @ToString.Exclude
 //    @EqualsAndHashCode.Exclude
-    private List<DynamicQuestion> dynamicQuestions;
+//    @JsonIgnore
+    private List<TimeRange> timeRanges = new ArrayList<>();
 
-//    @ManyToOne
-//    @JoinColumn(name = "allWorkingDays", referencedColumnName = "id")
-//    private AllWorkingDays allWorkingDays;
-//
-//    @ManyToOne
-//    @JoinColumn(name = "specificDay", referencedColumnName = "id")
-//    private SpecificDay specificDay;
-//
-//    @ManyToOne
-//    @JoinColumn(name = "dateRange", referencedColumnName = "id")
-//    private DateRange dateRange;
-//
+    private VisitDateType visitDateType;
+
+    @OneToMany(mappedBy = "visitOption", cascade = CascadeType.ALL, orphanRemoval = true)
+//    @ToString.Exclude
+//    @EqualsAndHashCode.Exclude
+    private List<SpecificDate> specificDates;
+
 //    @ManyToOne
 //    @JoinColumn(name = "servicePoints", referencedColumnName = "id")
 //    private ServicePoints servicePoints;
