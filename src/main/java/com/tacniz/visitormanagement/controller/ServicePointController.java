@@ -1,6 +1,6 @@
 package com.tacniz.visitormanagement.controller;
 
-import com.tacniz.visitormanagement.model.ServicePointDto;
+import com.tacniz.visitormanagement.dto.ServicePointDto;
 import com.tacniz.visitormanagement.service.ServicePointService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,14 +19,9 @@ public class ServicePointController {
     private final ServicePointService servicePointService;
 
     @PostMapping
-    public ResponseEntity<ServicePointDto> createServicePoint(
-            @Valid @RequestBody ServicePointDto servicePointDto) {
+    public ResponseEntity<ServicePointDto> createServicePoint(@RequestBody ServicePointDto servicePointDto) {
         ServicePointDto createdServicePoint = servicePointService.createServicePoint(servicePointDto);
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(createdServicePoint.getId())
-                .toUri();
-        return ResponseEntity.created(location).body(createdServicePoint);
+        return ResponseEntity.ok(createdServicePoint);
     }
 
     @GetMapping("/{id}")
@@ -57,4 +52,9 @@ public class ServicePointController {
             @PathVariable String status) {
         return ResponseEntity.ok(servicePointService.getServicePointsByStatus(status));
     }
+
+//    @GetMapping("/getPointQuestions/{officerId}/{visitId}")
+//    public
+
+
 }

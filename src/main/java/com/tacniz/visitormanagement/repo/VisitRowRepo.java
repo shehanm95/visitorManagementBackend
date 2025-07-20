@@ -28,4 +28,6 @@ public interface VisitRowRepo extends JpaRepository<VisitRow, Long> {
             @Param("date") LocalDate date,
             @Param("visitOptionId") Long visitOptionId
     );
+
+    List<VisitRow> findByVisitOptionIdAndDate(Long visitOptionId, LocalDate date);
 }

@@ -15,4 +15,5 @@ import java.time.LocalDate;
 public class SpecificDateDto {
     private Long id;
     private LocalDate date;
+    private IdObject visitOption;
 }

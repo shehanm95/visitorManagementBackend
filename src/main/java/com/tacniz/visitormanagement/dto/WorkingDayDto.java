@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class WorkingDaysDto {
+public class WorkingDayDto {
     private Long id;
 
     private String dateName;

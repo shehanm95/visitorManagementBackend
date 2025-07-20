@@ -1,5 +1,6 @@
 package com.tacniz.visitormanagement.mapper;
 
+import com.tacniz.visitormanagement.dto.FullVisitDto;
 import com.tacniz.visitormanagement.dto.VisitDto;
 import com.tacniz.visitormanagement.model.Visit;
 
@@ -14,4 +15,6 @@ public interface VisitMapper {
     List<VisitDto> toDtoList(List<Visit> visits);
 
     List<Visit> toEntityList(List<VisitDto> dtos);
+
+    FullVisitDto toFullVisitDto(Visit visit);
 }

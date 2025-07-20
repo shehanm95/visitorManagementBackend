@@ -23,6 +23,7 @@ public class VisitRowMapperImpl implements VisitRowMapper {
 
     @Override
     public VisitRowDto toDto(VisitRow visitRow) {
+        if(visitRow == null) return null;
         VisitRowDto visitRowDto = objectMapper.convertValue(visitRow,VisitRowDto.class);
         visitRowDto.setVisits(visitRepository.findByVisitRowId(visitRow.getId())
                 .stream()

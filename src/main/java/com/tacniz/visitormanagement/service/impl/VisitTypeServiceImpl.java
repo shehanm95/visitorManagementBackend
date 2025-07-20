@@ -56,13 +56,13 @@ public class VisitTypeServiceImpl implements VisitTypeService {
     public VisitTypeDTO getVisitTypeById(Long id) {
         VisitType visitType = visitTypeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("VisitType not found with id: " + id));
-        return objectMapper.convertValue(visitTypeRepository.save(visitType),VisitTypeDTO.class);
+        return objectMapper.convertValue(visitType,VisitTypeDTO.class);
     }
 
     @Override
     public List<VisitTypeDTO> getAllVisitTypes() {
         return visitTypeRepository.findAll().stream()
-                .map(visitTypeMapper::toDto)
+                .map(v->objectMapper.convertValue(v,VisitTypeDTO.class))
                 .collect(Collectors.toList());
     }
 

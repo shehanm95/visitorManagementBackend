@@ -1,6 +1,7 @@
 package com.tacniz.visitormanagement.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.tacniz.visitormanagement.dto.SpecificDateDto;
 import jakarta.persistence.*;
 import lombok.*;
@@ -62,15 +63,15 @@ public class VisitOption {
 
     private boolean isActive;
 
-    @OneToMany(mappedBy = "visitOption")
+    @OneToMany(mappedBy = "visitOption", fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private List<VisitRow> visitRows = new ArrayList<>();
 
     @OneToMany(mappedBy = "visitOption", cascade = CascadeType.ALL, orphanRemoval = true)
-//    @ToString.Exclude
-//    @EqualsAndHashCode.Exclude
-//    @JsonIgnore
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<TimeRange> timeRanges = new ArrayList<>();
 
     private VisitDateType visitDateType;
@@ -78,9 +79,16 @@ public class VisitOption {
     @OneToMany(mappedBy = "visitOption", cascade = CascadeType.ALL, orphanRemoval = true)
 //    @ToString.Exclude
 //    @EqualsAndHashCode.Exclude
-    private List<SpecificDate> specificDates;
+    @JsonIgnore
+    private List<SpecificDate> specificDates = new ArrayList<>();
 
-//    @ManyToOne
-//    @JoinColumn(name = "servicePoints", referencedColumnName = "id")
-//    private ServicePoints servicePoints;
+    @OneToMany(mappedBy = "visitOption", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    @ToString.Exclude
+    private List<ServicePoint> servicePoints = new ArrayList<>();
+
+
+    @OneToMany(mappedBy = "visitOption",  cascade = CascadeType.ALL , orphanRemoval = true)
+    @JsonIgnore
+    private List<Holiday> holidays = new ArrayList<>();
 }

@@ -1,12 +1,18 @@
 package com.tacniz.visitormanagement.controller;
 
+import com.tacniz.visitormanagement.dto.FullVisitDto;
 import com.tacniz.visitormanagement.dto.VisitDto;
+import com.tacniz.visitormanagement.dto.VisitRowDto;
+import com.tacniz.visitormanagement.dto.VisitRowReq;
+import com.tacniz.visitormanagement.model.VisitOption;
 import com.tacniz.visitormanagement.service.VisitService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
@@ -28,8 +34,8 @@ public class VisitController {
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<VisitDto> getVisitById(@PathVariable Long id) {
-        VisitDto visitDto = visitService.getVisitById(id);
+    public ResponseEntity<FullVisitDto> getVisitById(@PathVariable Long id) {
+        FullVisitDto visitDto = visitService.getVisitById(id);
         return ResponseEntity.ok(visitDto);
     }
 
@@ -74,5 +80,16 @@ public class VisitController {
        }
        visitService.markAsPrinted(id);
      return ResponseEntity.ok(null);
+    }
+
+    @PostMapping("/getVisitRowsForDate")
+    public List<VisitRowDto> getVisitRowsForDate(@RequestBody @Valid VisitRowReq visitRowReq){
+        return visitService.getVisitRowsForDate(visitRowReq.getDate(),visitRowReq.getVisitOption());
+    }
+
+    @PostMapping("/createPreRegVisit")
+    public ResponseEntity<VisitDto>  cratePreReg(@RequestBody VisitDto visit){
+        VisitDto createdVisit = visitService.createPreReg(visit);
+        return ResponseEntity.ok(createdVisit);
     }
 }

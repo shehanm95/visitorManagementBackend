@@ -1,15 +1,14 @@
 package com.tacniz.visitormanagement.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tacniz.visitormanagement.dto.FullVisitDto;
+import com.tacniz.visitormanagement.dto.IdObject;
 import com.tacniz.visitormanagement.dto.VisitDto;
-import com.tacniz.visitormanagement.model.TimeRange;
-import com.tacniz.visitormanagement.model.Visit;
-import com.tacniz.visitormanagement.model.VisitOption;
-import com.tacniz.visitormanagement.model.VisitRow;
-import com.tacniz.visitormanagement.repo.TimeRangeRepository;
-import com.tacniz.visitormanagement.repo.VisitOptionRepository;
-import com.tacniz.visitormanagement.repo.VisitRepository;
-import com.tacniz.visitormanagement.repo.VisitRowRepo;
+import com.tacniz.visitormanagement.dto.VisitRowDto;
+import com.tacniz.visitormanagement.mapper.FullVisitMapper;
+import com.tacniz.visitormanagement.mapper.VisitMapper;
+import com.tacniz.visitormanagement.model.*;
+import com.tacniz.visitormanagement.repo.*;
 import com.tacniz.visitormanagement.service.VisitService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +19,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,26 +31,66 @@ public class VisitServiceImpl implements VisitService {
     private final VisitOptionRepository visitOptionRepository;
     private final VisitRowRepo visitRowRepo;
     private final TimeRangeRepository timeRangeRepository;
+    private final VisitMapper visitMapper;
+    private final ButtonAnswerRepository buttonAnswerRepository;
+
+//    @Override
+//    @Transactional
+//    public VisitDto createVisit(VisitDto visitDto) {
+//        // Convert and validate
+//        Visit visit = objectMapper.convertValue(visitDto, Visit.class);
+//        VisitOption visitOption = visitOptionRepository.findById(visit.getVisitOption().getId())
+//                .orElseThrow(() -> new IllegalArgumentException("Invalid visit option ID"));
+//        visit.setVisitOption(visitOption);
+//
+//
+//
+//
+//
+//        // Save dynamic answers
+//        Visit savedVisit = null;
+//        visit.getDynamicAnswers().forEach(answer -> answer.setVisit(visit));
+//        if (visitRepository.existsByVisitRowAndVisitor(
+//                availableRow,
+//                visit.getVisitor())) {
+//            throw new IllegalArgumentException(
+//                    "Visitor already has a booking in this time slot");
+//        }else {
+//            savedVisit = visitRepository.save(visit);
+//        }
+//
+//        return objectMapper.convertValue(savedVisit,VisitDto.class);
+//    }
 
     @Override
     @Transactional
     public VisitDto createVisit(VisitDto visitDto) {
-        // Convert and validate
-        Visit visit = objectMapper.convertValue(visitDto, Visit.class);
-        VisitOption visitOption = visitOptionRepository.findById(visit.getVisitOption().getId())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid visit option ID"));
+
+        VisitOption visitOption = visitOptionRepository.findById(visitDto.getVisitOption().getId()).orElseThrow(()->new IllegalArgumentException("attached visit option not available in the database"));
+        Visit visit = visitMapper.toEntity(visitDto);
+        //visit.getDynamicAnswers().forEach(da->da.getSelectedButtonAnswers().forEach(ba->ba.addDynamicAnswer(da)));
+
+        visit.getDynamicAnswers().forEach(da -> {
+            List<ButtonAnswer> attachedAnswers = new ArrayList<>();
+            for (ButtonAnswer ba : da.getSelectedButtonAnswers()) {
+                ButtonAnswer attachedBa = buttonAnswerRepository.findById(ba.getId())
+                        .orElseThrow(() -> new IllegalArgumentException("ButtonAnswer with id " + ba.getId() + " not found"));
+                attachedBa.addDynamicAnswer(da);
+                attachedAnswers.add(attachedBa);
+            }
+            da.setSelectedButtonAnswers(attachedAnswers);
+        });
         visit.setVisitOption(visitOption);
-
-
 
         // Get or create visit rows
         List<VisitRow> visitRows = visitRowRepo.findByDateAndVisitOptionId(
                 visit.getRequestedDate().toLocalDate(),
-                visitOption.getId()
+                visit.getVisitOption().getId()
         );
 
+       // System.out.println(visitRows);
         if(visitRows.isEmpty()) {
-            visitRows = createVisitRowsForDate(visit.getRequestedDate().toLocalDate(), visitOption);
+            visitRows = createVisitRowsForDate(visit.getRequestedDate().toLocalDate(), visit.getVisitOption());
         }
 
         VisitRow availableRow = null;
@@ -84,21 +124,10 @@ public class VisitServiceImpl implements VisitService {
         availableRow.getVisits().add(visit);
         visit.setVisitRow(availableRow);
         visit.setPrintedDate(null);
-
-        // Save dynamic answers
-        Visit savedVisit = null;
-        visit.getDynamicAnswers().forEach(answer -> answer.setVisit(visit));
-        if (visitRepository.existsByVisitRowAndVisitor(
-                availableRow,
-                visit.getVisitor())) {
-            throw new IllegalArgumentException(
-                    "Visitor already has a booking in this time slot");
-        }else {
-            savedVisit = visitRepository.save(visit);
-        }
-
-        return objectMapper.convertValue(savedVisit,VisitDto.class);
+        visit = visitRepository.save(visit);
+        return visitMapper.toDto(visit);
     }
+
 
     private List<VisitRow> createVisitRowsForDate(LocalDate date, VisitOption visitOption) {
         List<VisitRow> newVisitRows = new ArrayList<>();
@@ -141,11 +170,52 @@ public class VisitServiceImpl implements VisitService {
 
     }
 
+    public List<VisitRowDto> getVisitRowsForDate(LocalDate date, IdObject visitOptionIdObj){
+        VisitOption visitOption = visitOptionRepository.findById(visitOptionIdObj.getId())
+                .orElseThrow(()->new IllegalArgumentException("visit option not exist in the database"));
+
+        if(visitOption.getTimeRanges() == null || visitOption.getTimeRanges().isEmpty())
+            throw new IllegalArgumentException("In VisitOption, time ranges cannot be null or empty to get visit rows");
+
+//        if(visitOption.getVisitDateType() == VisitDateType.SPECIFIC_DATES){
+//            boolean includes = false;
+//            for(SpecificDate d :visitOption.getSpecificDates()){
+//                if(d.getDate() == date) {
+//                    includes = true;
+//                    break;
+//                }
+//            };
+//            if(!includes) {
+//                throw new IllegalArgumentException("visitDate must me include in the specific visit dates");
+//            }
+//        }
+
+        List<VisitRow> visitRows = visitRowRepo.findByVisitOptionIdAndDate(visitOption.getId(),date);
+        if(visitRows.isEmpty()){
+            visitRows = createVisitRowsForDate(date,visitOption);
+        }
+
+        List<VisitRowDto> rows = visitRows.stream()
+                .map(r-> objectMapper.convertValue(r,VisitRowDto.class))
+                .collect(Collectors.toList());
+
+        rows.forEach(r-> r.setVisits(
+                visitRepository.findByVisitRowId(r.getId())
+                        .stream()
+                        .map(v->objectMapper.convertValue(v,VisitDto.class))
+                        .collect(Collectors.toList())
+
+        ));
+        return rows;
+
+    }
+
     @Override
-    public VisitDto getVisitById(Long id) {
+    public FullVisitDto getVisitById(Long id) {
         Visit visit = visitRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Visit not found with id: " + id));
-        return objectMapper.convertValue(visit, VisitDto.class);
+        return visitMapper.toFullVisitDto(visit);
+
     }
 
     @Override
@@ -203,6 +273,19 @@ public class VisitServiceImpl implements VisitService {
         Visit visit = visitRepository.findById(id).orElseThrow(()->new IllegalArgumentException("requested visit is not exist in the database"));
         visit.setPrinted(true);
         visitRepository.save(visit);
+    }
+
+    @Override
+    public VisitDto createPreReg(VisitDto visit) {
+        VisitRow visitRow = visitRowRepo.findById(visit.getVisitRow().getId()).orElseThrow(()->new IllegalArgumentException("VisitRow not exist in the database"));
+        if(visitRow.getVisitorsPerRow() < visitRow.getVisits().size()){
+            throw new IllegalArgumentException("Sorry The visit row just now filed before you");
+        }
+        Visit visitToBeCreate = objectMapper.convertValue(visit,Visit.class);
+        visitRow.addVisit(visitToBeCreate);
+        Visit createVisit = visitRepository.save(visitToBeCreate);
+        visitRowRepo.save(visitRow);
+        return objectMapper.convertValue(createVisit,VisitDto.class);
     }
 
     private List<Visit> getByVisitOptionId(Long id){

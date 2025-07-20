@@ -1,39 +1,44 @@
 package com.tacniz.visitormanagement.mapper.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tacniz.visitormanagement.dto.IdVisitOptionObject;
-import com.tacniz.visitormanagement.dto.VisitDto;
+import com.tacniz.visitormanagement.dto.*;
 import com.tacniz.visitormanagement.model.Visit;
 import com.tacniz.visitormanagement.mapper.*;
 import com.tacniz.visitormanagement.model.VisitOption;
+import com.tacniz.visitormanagement.repo.VisitOptionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
 public class VisitMapperImpl implements VisitMapper {
 
-    private final ObjectMapper objectMapper;
-    private final UserMapper userMapper;
-    private final DynamicAnswerMapper dynamicAnswerMapper;
-    private final VisitOptionMapper visitOptionMapper;
-    private final VisitRowMapper visitRowMapper;
-    private final GateMapper gateMapper;
+    @Autowired
+    @Lazy
+    private ObjectMapper objectMapper;
+    @Autowired
+    @Lazy
+    private UserMapper userMapper;
+    @Autowired
+    @Lazy
+    private DynamicAnswerMapper dynamicAnswerMapper;
+    @Autowired
+    @Lazy
+    private VisitOptionMapper visitOptionMapper;
+    @Autowired
+    @Lazy
+    private VisitRowMapper visitRowMapper;
+    @Autowired
+    @Lazy
+    private GateMapper gateMapper;
+    @Autowired
+    @Lazy
+    private VisitOptionRepository visitOptionRepository;
 
-    public VisitMapperImpl(ObjectMapper objectMapper,
-                           UserMapper userMapper,
-                           DynamicAnswerMapper dynamicAnswerMapper,
-                           VisitOptionMapper visitOptionMapper,
-                           VisitRowMapper visitRowMapper,
-                           GateMapper gateMapper) {
-        this.objectMapper = objectMapper;
-        this.userMapper = userMapper;
-        this.dynamicAnswerMapper = dynamicAnswerMapper;
-        this.visitOptionMapper = visitOptionMapper;
-        this.visitRowMapper = visitRowMapper;
-        this.gateMapper = gateMapper;
-    }
 
     @Override
     public VisitDto toDto(Visit visit) {
@@ -59,7 +64,10 @@ public class VisitMapperImpl implements VisitMapper {
 
         visit.setVisitOption(objectMapper.convertValue(dto.getVisitOption(), VisitOption.class));
         visit.setVisitor(userMapper.toEntity(dto.getVisitor()));
+
         visit.setDynamicAnswers(dynamicAnswerMapper.toEntityList(dto.getDynamicAnswers()));
+        visit.getDynamicAnswers().forEach(a->a.setVisit(visit));
+
         visit.setVisitRow(visitRowMapper.toEntity(dto.getVisitRow()));
         visit.setEnteredGate(gateMapper.toEntity(dto.getEnteredGate()));
         visit.setExitGate(gateMapper.toEntity(dto.getExitGate()));
@@ -78,4 +86,19 @@ public class VisitMapperImpl implements VisitMapper {
         if (dtos == null) return null;
         return dtos.stream().map(this::toEntity).collect(Collectors.toList());
     }
+
+
+    @Override
+    public FullVisitDto toFullVisitDto(Visit visit){
+
+        FullVisitDto fullVisitDto = objectMapper.convertValue( this.toDto(visit),FullVisitDto.class);
+        VisitOption visitOption = visitOptionRepository.findById(visit.getVisitOption().getId()).orElse(null);
+
+        VisitOptionDTO visitOptionDTO = visitOptionMapper.toDto(visitOption);
+        fullVisitDto.setVisitOption(visitOptionDTO);
+        fullVisitDto.getVisitRow().setVisits(Collections.emptyList());
+        return fullVisitDto;
+    }
+
+
 }

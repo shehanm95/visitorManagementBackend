@@ -63,6 +63,7 @@ public class VisitOptionDTO {
     private List<TimeRangeDto> timeRanges = new ArrayList<>();
 
     private VisitDateType visitDateType;
-    private List<SpecificDate> specificDates;
+    private List<SpecificDateDto> specificDates;
 
+    private List<ServicePointDto> servicePoints;
 }

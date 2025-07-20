@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @Entity
 @Table(name = "working_days")
-public class WorkingDays {
+public class WorkingDay {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

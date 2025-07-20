@@ -48,6 +48,7 @@ public class VisitTypeController {
     @GetMapping("/all")
     public ResponseEntity<List<VisitTypeDTO>> getAllVisitTypes() {
         List<VisitTypeDTO> visitTypes = visitTypeService.getAllVisitTypes();
+        System.out.println(visitTypes);
         return ResponseEntity.ok(visitTypes);
     }
 

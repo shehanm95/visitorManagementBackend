@@ -1,2 +1,7 @@
-package com.tacniz.visitormanagement.repo;public interface DutyRepository {
+package com.tacniz.visitormanagement.repo;
+
+import com.tacniz.visitormanagement.model.Duty;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface DutyRepository extends JpaRepository<Duty, Long> {
 }

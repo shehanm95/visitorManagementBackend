@@ -14,4 +14,5 @@ public interface DynamicQuestionService {
     void deleteQuestion(Long id);
 
     List<DynamicQuestionDTO> getAll();
+
 }

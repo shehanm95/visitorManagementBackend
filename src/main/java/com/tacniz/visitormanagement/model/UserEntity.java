@@ -30,16 +30,15 @@ public class UserEntity {
     @NotBlank(message = "Last name is required")
     private String lastName;
 
-
     private String imagePath;
 
-    @Column(nullable = false, unique = true, length = 255) // Added length to match char(255)
+    @Column(nullable = false, unique = true, length = 255)
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
     private String email;
 
     @Column(name = "is_email_verified")
-    private Boolean isEmailVerified; // Added to match schema
+    private Boolean isEmailVerified;
 
     @Column(name = "phone_number", nullable = false, length = 50) // Added phoneNumber field
     @NotBlank(message = "Phone number is required")
@@ -57,17 +56,19 @@ public class UserEntity {
     @Column(name = "user_role", nullable = false)
     private Role role; // Updated to match the schema field name
 
-
     @OneToMany(mappedBy = "visitor")
     @JsonIgnore
     private List<Visit> visits = new ArrayList<>();
 
-//    @ManyToOne
-//    @JoinColumn(name = "service_points_as_moderator") // FK1: servicePoints (as moderator)
-//    private ServicePointEntity servicePoints;
+    @OneToMany(mappedBy = "officer", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<SpecialNote> createdNotes;
 
-//    @ManyToOne
-//    @JoinColumn(name = "service_point_as_officer") // FK2: servicePoint (as officer)
-//    private ServicePointEntity servicePoint;
+    @ManyToMany(mappedBy = "reviewedBy")
+    @JsonIgnore
+    private List<SpecialNote> reviewedNotes;
 
+    @OneToMany(mappedBy = "officer" , cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Duty> duties;
 }

@@ -25,6 +25,7 @@ public class TimeRange {
     private VisitOption visitOption;
 
     @OneToMany(mappedBy = "timeRange")
+    @JsonIgnore
     private List<VisitRow> visitRows;
 
     private LocalTime startTime;

@@ -13,8 +13,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+// For the repository interface (if in separate file):
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -83,6 +93,45 @@ public class UserServiceImpl implements UserService {
         }
         UserEntity user = userEntityRepository.findByEmail(email).orElseThrow(()->new IllegalArgumentException("User not found in the database"));
         return objectMapper.convertValue(user, UserDto.class);
+    }
+
+    @Override
+    public List<UserDto> findUser(String input) {
+        // Try to parse input as Long (for ID search)
+        try {
+            Long id = Long.parseLong(input);
+            Optional<UserEntity> user = userEntityRepository.findById(id);
+            if (user.isPresent()) {
+                return List.of(convertToDto(user.get()));
+            }
+        } catch (NumberFormatException e) {
+            // Input is not a number, continue with text search
+        }
+
+        // Search by firstName, lastName, or email containing the input (case insensitive)
+        // Limit results to 10
+        Pageable limit = PageRequest.of(0, 10);
+        List<UserEntity> users = userEntityRepository
+                .findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmailContainingIgnoreCase(
+                        input, input, input, limit
+                );
+
+        return users.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+
+    // Helper method to convert UserEntity to UserDto
+    private UserDto convertToDto(UserEntity user) {
+        return UserDto.builder()
+                .id(user.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .phoneNumber(user.getPhoneNumber())
+                .role(user.getRole().toString())
+                .build();
     }
 
 }

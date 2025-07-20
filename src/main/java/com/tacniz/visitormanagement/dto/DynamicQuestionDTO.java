@@ -1,17 +1,24 @@
 package com.tacniz.visitormanagement.dto;
 
+import com.tacniz.visitormanagement.model.DynamicQuestion;
+import com.tacniz.visitormanagement.model.ReferenceHolder;
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class DynamicQuestionDTO {
 
-    private Long id =0L;
+    private Long id;
 
     @NotNull(message = "visit option cannot be null")
     private VisitOptionDTO visitOption;
@@ -39,4 +46,8 @@ public class DynamicQuestionDTO {
 
     @NotNull(message = "Can select more than one answer cannot be null")
     private boolean canSelectMoreThanOne;
+
+    private List<DynamicQuestionDTO> parentQuestions;
+
+    private List<DynamicQuestionDTO> referenceQuestions;
 }

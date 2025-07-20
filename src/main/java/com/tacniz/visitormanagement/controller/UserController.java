@@ -54,4 +54,9 @@ public class UserController {
     public ResponseEntity<UserDto> setPhoto(@RequestBody MultipartFile photo, @PathVariable Long visitId){
         return userService.setPhoto(photo, visitId);
     }
+
+    @GetMapping("findUser/{input}")
+    public ResponseEntity<List<UserDto>> findUser(@PathVariable String input){
+        return ResponseEntity.ok(userService.findUser(input));
+    }
 }

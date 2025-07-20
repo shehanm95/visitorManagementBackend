@@ -5,14 +5,12 @@ import com.tacniz.visitormanagement.dto.ButtonAnswerDTO;
 import com.tacniz.visitormanagement.dto.DynamicQuestionDTO;
 import com.tacniz.visitormanagement.mapper.ButtonAnswerMapper;
 import com.tacniz.visitormanagement.mapper.DynamicQuestionMapper;
-import com.tacniz.visitormanagement.mapper.VisitOptionMapper;
 import com.tacniz.visitormanagement.model.AnswerType;
 import com.tacniz.visitormanagement.model.ButtonAnswer;
 import com.tacniz.visitormanagement.model.DynamicQuestion;
 import com.tacniz.visitormanagement.model.VisitOption;
-import lombok.RequiredArgsConstructor;
+import com.tacniz.visitormanagement.repo.DynamicQuestionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -23,8 +21,10 @@ import java.util.stream.Collectors;
 public class DynamicQuestionMapperImpl implements DynamicQuestionMapper {
     @Autowired
     private  ButtonAnswerMapper buttonAnswerMapper;
-   @Autowired
+    @Autowired
     private  ObjectMapper objectMapper;
+    @Autowired
+    private DynamicQuestionRepository dynamicQuestionRepository;
 
     @Override
     public DynamicQuestion toEntity(DynamicQuestionDTO dto) {
@@ -34,7 +34,7 @@ public class DynamicQuestionMapperImpl implements DynamicQuestionMapper {
 
         DynamicQuestion dynamicQuestion = objectMapper.convertValue(dto, DynamicQuestion.class);
         dynamicQuestion.setVisitOption(objectMapper.convertValue(dto.getVisitOption(), VisitOption.class));
-        dynamicQuestion.setAnswerType(dto.getAnswerType() != null ? AnswerType.valueOf(dto.getAnswerType()) : null);
+
 
         // Map buttonAnswers and set the bidirectional relationship
         if (dto.getButtonAnswers() != null) {
@@ -46,6 +46,22 @@ public class DynamicQuestionMapperImpl implements DynamicQuestionMapper {
         } else {
             dynamicQuestion.setButtonAnswers(Collections.emptyList());
         }
+
+        if (dto.getReferenceQuestions() != null) {
+            List<DynamicQuestion> references = dto.getReferenceQuestions().stream()
+                    .map(refDto -> dynamicQuestionRepository.findById(refDto.getId())
+                            .orElseThrow(() -> new IllegalArgumentException("Reference question not found: " + refDto.getId())))
+                    .collect(Collectors.toList());
+
+            for (DynamicQuestion reference : references) {
+                reference.addParentQuestion(dynamicQuestion); // Sets both sides
+            }
+
+            dynamicQuestion.setReferenceQuestions(references);
+        } else {
+            dynamicQuestion.setReferenceQuestions(Collections.emptyList());
+        }
+
 
         return dynamicQuestion;
     }
@@ -70,6 +86,17 @@ public class DynamicQuestionMapperImpl implements DynamicQuestionMapper {
             dto.setButtonAnswers(Collections.emptyList());
         }
 
+        List<DynamicQuestionDTO> references = dynamicQuestionRepository.findReferenceQuestionsByParentId(entity.getId())
+                .stream()
+                .map(rq->objectMapper.convertValue(rq,DynamicQuestionDTO.class))
+                .collect(Collectors.toList());
+
+        dto.setReferenceQuestions(references);
         return dto;
+    }
+
+    @Override
+    public List<DynamicQuestionDTO> toDtoList(List<DynamicQuestion> officerQuestions) {
+        return officerQuestions.stream().map(this::toDto).toList();
     }
 }

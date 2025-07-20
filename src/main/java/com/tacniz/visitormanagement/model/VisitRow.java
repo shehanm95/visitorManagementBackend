@@ -9,7 +9,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,4 +45,15 @@ public class VisitRow {
     @OneToMany(mappedBy = "visitRow" , fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Visit> visits= new ArrayList<>();
+
+
+    public void addVisit(Visit visit) {
+        visits.add(visit);
+        visit.setVisitRow(this);
+    }
+
+    public void removeVisit(Visit visit) {
+        visits.remove(visit);
+        visit.setVisitRow(null);
+    }
 }

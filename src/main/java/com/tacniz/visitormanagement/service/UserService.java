@@ -22,4 +22,6 @@ public interface UserService {
     ResponseEntity<UserDto> setPhoto(MultipartFile photo, Long visitId);
 
     UserDto getUserByEmail(String email);
+
+    List<UserDto> findUser(String input);
 }

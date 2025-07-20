@@ -7,6 +7,8 @@ import com.tacniz.visitormanagement.mapper.VisitMapper;
 import com.tacniz.visitormanagement.model.SpecialNote;
 import com.tacniz.visitormanagement.mapper.SpecialNoteMapper;
 import com.tacniz.visitormanagement.mapper.ServicePointMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -15,20 +17,19 @@ import java.util.stream.Collectors;
 @Component
 public class SpecialNoteMapperImpl implements SpecialNoteMapper {
 
-    private final ObjectMapper objectMapper;
-    private final UserMapper userMapper;
-    private final ServicePointMapper servicePointMapper;
-    private final VisitMapper visitMapper;
+    @Autowired
+    @Lazy
+    private ObjectMapper objectMapper;
+    @Autowired
+    @Lazy
+    private UserMapper userMapper;
+    @Autowired
+    @Lazy
+    private ServicePointMapper servicePointMapper;
+    @Autowired
+    @Lazy
+    private VisitMapper visitMapper;
 
-    public SpecialNoteMapperImpl(ObjectMapper objectMapper,
-                                 UserMapper userMapper,
-                                 ServicePointMapper servicePointMapper,
-                                 VisitMapper visitMapper) {
-        this.objectMapper = objectMapper;
-        this.userMapper = userMapper;
-        this.servicePointMapper = servicePointMapper;
-        this.visitMapper = visitMapper;
-    }
 
     @Override
     public SpecialNoteDto toDto(SpecialNote note) {

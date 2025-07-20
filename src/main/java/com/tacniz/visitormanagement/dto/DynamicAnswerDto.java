@@ -11,5 +11,6 @@ public class DynamicAnswerDto {
     private DynamicQuestionDTO dynamicQuestion;
     private AnswerType answerType;
     private String value;
-    private List<ButtonAnswerDTO> buttonAnswers;
+    private List<ButtonAnswerDTO> selectedButtonAnswers;
+    private VisitDto visit;
 }

@@ -8,17 +8,24 @@ import com.tacniz.visitormanagement.mapper.DutyMapper;
 import com.tacniz.visitormanagement.mapper.ServicePointMapper;
 import com.tacniz.visitormanagement.model.UserEntity;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
-@RequiredArgsConstructor
+@Service
 public class DutyMapperImpl implements DutyMapper {
 
-    private final ObjectMapper objectMapper;
-    private final ServicePointMapper servicePointMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    @Lazy
+    private ServicePointMapper servicePointMapper;
+
+
 
 
     @Override
@@ -27,7 +34,7 @@ public class DutyMapperImpl implements DutyMapper {
 
         DutyDto dto = objectMapper.convertValue(duty, DutyDto.class);
 
-        dto.setServicePoint(servicePointMapper.toDto(duty.getServicePoint()));
+       // dto.setServicePoint(servicePointMapper.toDto(duty.getServicePoint()));
         dto.setOfficer(objectMapper.convertValue(duty.getOfficer(), UserDto.class));
 
         return dto;

@@ -32,6 +32,7 @@ public class VisitOptionController {
 
         VisitOptionDTO visitOptionDTO = objectMapper.readValue(visitOptionJson, VisitOptionDTO.class);
         visitOptionDTO.setImage(coverImage);
+        System.out.println(visitOptionJson);
         VisitOptionDTO createdVisitOption = visitOptionService.createVisitOption(visitOptionDTO);
         System.out.println(createdVisitOption);
         return new ResponseEntity<>(createdVisitOption, HttpStatus.CREATED);

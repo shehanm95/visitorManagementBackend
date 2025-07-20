@@ -6,6 +6,11 @@ import com.tacniz.visitormanagement.model.DynamicAnswer;
 import com.tacniz.visitormanagement.mapper.ButtonAnswerMapper;
 import com.tacniz.visitormanagement.mapper.DynamicAnswerMapper;
 import com.tacniz.visitormanagement.mapper.DynamicQuestionMapper;
+import com.tacniz.visitormanagement.model.DynamicQuestion;
+import com.tacniz.visitormanagement.model.Visit;
+import com.tacniz.visitormanagement.repo.VisitRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -17,6 +22,10 @@ public class DynamicAnswerMapperImpl implements DynamicAnswerMapper {
     private final ObjectMapper objectMapper;
     private final DynamicQuestionMapper dynamicQuestionMapper;
     private final ButtonAnswerMapper buttonAnswerMapper;
+
+    @Autowired
+    @Lazy
+    private VisitRepository visitRepository;
 
     public DynamicAnswerMapperImpl(ObjectMapper objectMapper,
                                    DynamicQuestionMapper dynamicQuestionMapper,
@@ -32,18 +41,37 @@ public class DynamicAnswerMapperImpl implements DynamicAnswerMapper {
 
         DynamicAnswerDto dto = objectMapper.convertValue(answer, DynamicAnswerDto.class);
         dto.setDynamicQuestion(dynamicQuestionMapper.toDto(answer.getDynamicQuestion()));
-        dto.setButtonAnswers(buttonAnswerMapper.toDtoList(answer.getButtonAnswers()));
+        dto.setSelectedButtonAnswers(buttonAnswerMapper.toDtoList(answer.getSelectedButtonAnswers()));
 
         return dto;
     }
 
-    @Override
     public DynamicAnswer toEntity(DynamicAnswerDto dto) {
         if (dto == null) return null;
 
-        DynamicAnswer answer = objectMapper.convertValue(dto, DynamicAnswer.class);
-        answer.setDynamicQuestion(dynamicQuestionMapper.toEntity(dto.getDynamicQuestion()));
-        answer.setButtonAnswers(buttonAnswerMapper.toEntityList(dto.getButtonAnswers()));
+        DynamicAnswer answer = new DynamicAnswer();
+
+        // Set basic fields
+        answer.setId(dto.getId());
+        answer.setAnswerType(dto.getAnswerType());
+        answer.setValue(dto.getValue());
+
+        // Set dynamic question
+        if (dto.getDynamicQuestion() != null) {
+            answer.setDynamicQuestion(dynamicQuestionMapper.toEntity(dto.getDynamicQuestion()));
+        }
+
+        // Set visit - just create a Visit object with ID, don't fetch from DB
+        if (dto.getVisit() != null && dto.getVisit().getId() != null) {
+            Visit visit = new Visit();
+            visit.setId(dto.getVisit().getId());
+            answer.setVisit(visit);
+        }
+
+        // Set selected button answers
+        if (dto.getSelectedButtonAnswers() != null) {
+            answer.setSelectedButtonAnswers(buttonAnswerMapper.toEntityList(dto.getSelectedButtonAnswers()));
+        }
 
         return answer;
     }

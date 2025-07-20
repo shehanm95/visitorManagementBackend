@@ -3,6 +3,7 @@ package com.tacniz.visitormanagement.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tacniz.visitormanagement.dto.VisitOptionDTO;
 import com.tacniz.visitormanagement.mapper.VisitOptionMapper;
+import com.tacniz.visitormanagement.model.SpecificDate;
 import com.tacniz.visitormanagement.model.TimeRange;
 import com.tacniz.visitormanagement.model.VisitOption;
 import com.tacniz.visitormanagement.model.VisitType;
@@ -72,6 +73,16 @@ public class VisitOptionServiceImpl implements VisitOptionService {
                     .collect(Collectors.toList());
 
             visitOption.setTimeRanges(timeRanges);
+        }
+        if(visitOptionDTO.getSpecificDates() != null){
+            List<SpecificDate> specificDates = visitOptionDTO.getSpecificDates()
+                    .stream()
+                    .map(s->{
+                        SpecificDate specificDate = objectMapper.convertValue(s,SpecificDate.class);
+                        specificDate.setVisitOption(visitOption);
+                        return specificDate;
+                    }).collect(Collectors.toList());
+          visitOption.setSpecificDates(specificDates);
         }
 
         // Save the visit option (with cascaded time ranges)

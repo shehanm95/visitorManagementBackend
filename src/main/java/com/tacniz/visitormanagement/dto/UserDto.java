@@ -1,11 +1,16 @@
 package com.tacniz.visitormanagement.dto;
 
+import com.tacniz.visitormanagement.model.Duty;
+import com.tacniz.visitormanagement.model.SpecialNote;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -34,5 +39,9 @@ public class UserDto {
 
     private Boolean isPhoneNumberVerified; // Added to match schema
 
-    private String role; // Will map to the Role enum (visitor, officer, moderator)
+    private String role;
+
+    private List<SpecialNoteDto> reviewedNotes;
+
+    private List<DutyDto> duties = new ArrayList<>();
 }
