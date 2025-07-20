@@ -2,6 +2,7 @@ package com.tacniz.visitormanagement.mapper.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tacniz.visitormanagement.dto.DynamicAnswerDto;
+import com.tacniz.visitormanagement.mapper.VisitMapper;
 import com.tacniz.visitormanagement.model.DynamicAnswer;
 import com.tacniz.visitormanagement.mapper.ButtonAnswerMapper;
 import com.tacniz.visitormanagement.mapper.DynamicAnswerMapper;
@@ -26,6 +27,10 @@ public class DynamicAnswerMapperImpl implements DynamicAnswerMapper {
     @Autowired
     @Lazy
     private VisitRepository visitRepository;
+
+    @Autowired
+    @Lazy
+    private VisitMapper visitMapper;
 
     public DynamicAnswerMapperImpl(ObjectMapper objectMapper,
                                    DynamicQuestionMapper dynamicQuestionMapper,
@@ -62,11 +67,14 @@ public class DynamicAnswerMapperImpl implements DynamicAnswerMapper {
         }
 
         // Set visit - just create a Visit object with ID, don't fetch from DB
+        Visit visit = new Visit();
         if (dto.getVisit() != null && dto.getVisit().getId() != null) {
-            Visit visit = new Visit();
-            visit.setId(dto.getVisit().getId());
-            answer.setVisit(visit);
+            visit = visitRepository.findById(dto.getId()).orElseThrow(()-> new IllegalArgumentException( "Dynamic Anser Mapper"));
+        }else {
+            visit = visitMapper.toEntity(dto.getVisit());
         }
+
+        answer.setVisit(visit);
 
         // Set selected button answers
         if (dto.getSelectedButtonAnswers() != null) {

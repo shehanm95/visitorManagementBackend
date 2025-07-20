@@ -27,11 +27,13 @@ public class ButtonAnswerMapperImpl implements ButtonAnswerMapper {
             return null;
         }
         System.out.println("converting button " + dto.getButtonText());
-        if(dto.getId() != null){
-            return buttonAnswerRepository.findById(dto.getId()).orElse(null);
-        }else{
-            return objectMapper.convertValue(dto, ButtonAnswer.class);
-        }
+//        if(dto.getId() != null){
+//            return buttonAnswerRepository.findById(dto.getId()).orElse(null);
+//        }else{
+            ButtonAnswer buttonAnswer = objectMapper.convertValue(dto, ButtonAnswer.class);
+            buttonAnswer.setButtonText(dto.getButtonText());
+            return buttonAnswer;
+//        }
 
 
     }

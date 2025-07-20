@@ -16,7 +16,6 @@ public class DynamicAnswer {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dynamic_question_id", nullable = false)
-
     @ToString.Exclude
     private DynamicQuestion dynamicQuestion;
 

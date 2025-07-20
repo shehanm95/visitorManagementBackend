@@ -69,7 +69,7 @@ public class VisitServiceImpl implements VisitService {
         VisitOption visitOption = visitOptionRepository.findById(visitDto.getVisitOption().getId()).orElseThrow(()->new IllegalArgumentException("attached visit option not available in the database"));
         Visit visit = visitMapper.toEntity(visitDto);
         //visit.getDynamicAnswers().forEach(da->da.getSelectedButtonAnswers().forEach(ba->ba.addDynamicAnswer(da)));
-
+        System.out.println("visit mapped");
         visit.getDynamicAnswers().forEach(da -> {
             List<ButtonAnswer> attachedAnswers = new ArrayList<>();
             for (ButtonAnswer ba : da.getSelectedButtonAnswers()) {
@@ -110,6 +110,7 @@ public class VisitServiceImpl implements VisitService {
                 break;
             }
         }
+        System.out.println("time created");
 
 // Throw appropriate exceptions based on the checks
         if (availableRow == null) {
@@ -130,35 +131,57 @@ public class VisitServiceImpl implements VisitService {
 
 
     private List<VisitRow> createVisitRowsForDate(LocalDate date, VisitOption visitOption) {
-        List<VisitRow> newVisitRows = new ArrayList<>();
+        List<VisitRow> allSavedRows = new ArrayList<>();
         int averageTime = visitOption.getAverageTimeForAPerson();
+        final int BATCH_SIZE = 50; // Process 50 at a time
 
         for(TimeRange timeRange : visitOption.getTimeRanges()) {
-            LocalTime startTime = timeRange.getStartTime();
-            LocalTime endTime = timeRange.getEndTime();
+            List<VisitRow> batchRows = new ArrayList<>();
 
-            while(startTime.plusMinutes(averageTime).isBefore(endTime) ||
-                    startTime.plusMinutes(averageTime).equals(endTime)) {
+            int startMinutes = timeRange.getStartTime().getHour() * 60 + timeRange.getStartTime().getMinute();
+            int endMinutes = timeRange.getEndTime().getHour() * 60 + timeRange.getEndTime().getMinute();
+            int currentMinutes = startMinutes;
 
-                LocalTime slotEndTime = startTime.plusMinutes(averageTime);
+            while(currentMinutes + averageTime <= endMinutes) {
+                LocalTime startTime = LocalTime.of(currentMinutes / 60, currentMinutes % 60);
+                LocalTime endTime = LocalTime.of((currentMinutes + averageTime) / 60,
+                        (currentMinutes + averageTime) % 60);
 
                 VisitRow visitRow = VisitRow.builder()
                         .visitorsPerRow(visitOption.getVisitorsPerRow())
                         .startTime(startTime)
-                        .endTime(slotEndTime)
+                        .endTime(endTime)
                         .visitOption(visitOption)
                         .date(date)
                         .visits(new ArrayList<>())
                         .timeRange(timeRange)
                         .build();
 
-                newVisitRows.add(visitRow);
-                startTime = slotEndTime;
+                batchRows.add(visitRow);
+
+                // Save in batches to free memory
+                if(batchRows.size() >= BATCH_SIZE) {
+                    List<VisitRow> savedBatch = visitRowRepo.saveAll(batchRows);
+                    allSavedRows.addAll(savedBatch);
+                    batchRows.clear(); // Free memory immediately
+                    System.gc(); // Suggest garbage collection
+                }
+
+                currentMinutes += averageTime;
+            }
+
+            // Save remaining batch
+            if(!batchRows.isEmpty()) {
+                List<VisitRow> savedBatch = visitRowRepo.saveAll(batchRows);
+                allSavedRows.addAll(savedBatch);
             }
         }
 
-        return visitRowRepo.saveAll(newVisitRows);
+        return allSavedRows;
     }
+
+
+
     private Visit getTodaysLastVisit(){
         LocalDate today = LocalDate.now();
         LocalDateTime startOfDay = today.atStartOfDay(); // 00:00:00
