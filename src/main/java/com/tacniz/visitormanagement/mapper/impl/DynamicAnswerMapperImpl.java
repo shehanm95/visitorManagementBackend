@@ -79,6 +79,9 @@ public class DynamicAnswerMapperImpl implements DynamicAnswerMapper {
         // Set selected button answers
         if (dto.getSelectedButtonAnswers() != null) {
             answer.setSelectedButtonAnswers(buttonAnswerMapper.toEntityList(dto.getSelectedButtonAnswers()));
+            if(answer.getDynamicQuestion() != null){
+                answer.getSelectedButtonAnswers().forEach(a->a.setDynamicQuestion(answer.getDynamicQuestion()));
+            }
         }
 
         return answer;

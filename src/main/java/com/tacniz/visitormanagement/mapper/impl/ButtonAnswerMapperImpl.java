@@ -26,18 +26,20 @@ public class ButtonAnswerMapperImpl implements ButtonAnswerMapper {
         if (dto == null) {
             return null;
         }
-        System.out.println("converting button " + dto.getButtonText());
-//        if(dto.getId() != null){
-//            return buttonAnswerRepository.findById(dto.getId()).orElse(null);
-//        }else{
-            ButtonAnswer buttonAnswer = objectMapper.convertValue(dto, ButtonAnswer.class);
-            buttonAnswer.setButtonText(dto.getButtonText());
-            return buttonAnswer;
-//        }
 
+        // For existing entities, fetch the managed instance
+        if (dto.getId() != null) {
+            return buttonAnswerRepository.findById(dto.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("ButtonAnswerMapper : ButtonAnswer not found with id: " + dto.getId()));
+        }
 
+        // Only create new instance if it's truly a new entity (no ID)
+        ButtonAnswer buttonAnswer = new ButtonAnswer();
+        buttonAnswer.setButtonText(dto.getButtonText());
+        // Set other fields as needed
+
+        return buttonAnswer;
     }
-
     @Override
     public ButtonAnswerDTO toDto(ButtonAnswer entity) {
         if (entity == null) {

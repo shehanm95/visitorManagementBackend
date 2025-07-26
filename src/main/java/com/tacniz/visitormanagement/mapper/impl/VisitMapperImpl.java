@@ -58,23 +58,53 @@ public class VisitMapperImpl implements VisitMapper {
 
     @Override
     public Visit toEntity(VisitDto dto) {
-        if (dto == null) return null;
+        if (dto == null) {
+            return null;
+        }
 
-        Visit visit = objectMapper.convertValue(dto, Visit.class);
+        Visit visit = new Visit();
 
-        visit.setVisitOption(objectMapper.convertValue(dto.getVisitOption(), VisitOption.class));
-        visit.setVisitor(userMapper.toEntity(dto.getVisitor()));
+        // Map simple fields
+        visit.setId(dto.getId());
+        visit.setImageName(dto.getImageName());
+        visit.setPrintedDate(dto.getPrintedDate());
+        visit.setCanceled(dto.isCanceled());
+        visit.setPrinted(dto.isPrinted());
+        visit.setRequestedDate(dto.getRequestedDate());
+        visit.setExitTime(dto.getExitTime());
 
-        visit.setDynamicAnswers(dynamicAnswerMapper.toEntityList(dto.getDynamicAnswers()));
-        visit.getDynamicAnswers().forEach(a->a.setVisit(visit));
+        // Map complex objects with null checks
+        if (dto.getVisitOption() != null) {
+            VisitOption visitOption = new VisitOption();
+            visitOption.setId(dto.getVisitOption().getId());
+            visit.setVisitOption(visitOption);
+        }
 
-        visit.setVisitRow(visitRowMapper.toEntity(dto.getVisitRow()));
-        visit.setEnteredGate(gateMapper.toEntity(dto.getEnteredGate()));
-        visit.setExitGate(gateMapper.toEntity(dto.getExitGate()));
+        if (dto.getVisitor() != null) {
+            visit.setVisitor(userMapper.toEntity(dto.getVisitor()));
+        }
+
+        if (dto.getDynamicAnswers() != null) {
+            visit.setDynamicAnswers(dynamicAnswerMapper.toEntityList(dto.getDynamicAnswers()));
+            if (visit.getDynamicAnswers() != null) {
+                visit.getDynamicAnswers().forEach(a -> a.setVisit(visit));
+            }
+        }
+
+        if (dto.getVisitRow() != null) {
+            visit.setVisitRow(visitRowMapper.toEntity(dto.getVisitRow()));
+        }
+
+        if (dto.getEnteredGate() != null) {
+            visit.setEnteredGate(gateMapper.toEntity(dto.getEnteredGate()));
+        }
+
+        if (dto.getExitGate() != null) {
+            visit.setExitGate(gateMapper.toEntity(dto.getExitGate()));
+        }
 
         return visit;
     }
-
     @Override
     public List<VisitDto> toDtoList(List<Visit> visits) {
         if (visits == null) return null;
@@ -96,7 +126,8 @@ public class VisitMapperImpl implements VisitMapper {
 
         VisitOptionDTO visitOptionDTO = visitOptionMapper.toDto(visitOption);
         fullVisitDto.setVisitOption(visitOptionDTO);
-        fullVisitDto.getVisitRow().setVisits(Collections.emptyList());
+        if(fullVisitDto.getVisitRow() != null){
+        fullVisitDto.getVisitRow().setVisits(Collections.emptyList());}
         return fullVisitDto;
     }
 

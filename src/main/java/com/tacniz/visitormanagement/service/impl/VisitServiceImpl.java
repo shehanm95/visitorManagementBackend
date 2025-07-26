@@ -34,34 +34,6 @@ public class VisitServiceImpl implements VisitService {
     private final VisitMapper visitMapper;
     private final ButtonAnswerRepository buttonAnswerRepository;
 
-//    @Override
-//    @Transactional
-//    public VisitDto createVisit(VisitDto visitDto) {
-//        // Convert and validate
-//        Visit visit = objectMapper.convertValue(visitDto, Visit.class);
-//        VisitOption visitOption = visitOptionRepository.findById(visit.getVisitOption().getId())
-//                .orElseThrow(() -> new IllegalArgumentException("Invalid visit option ID"));
-//        visit.setVisitOption(visitOption);
-//
-//
-//
-//
-//
-//        // Save dynamic answers
-//        Visit savedVisit = null;
-//        visit.getDynamicAnswers().forEach(answer -> answer.setVisit(visit));
-//        if (visitRepository.existsByVisitRowAndVisitor(
-//                availableRow,
-//                visit.getVisitor())) {
-//            throw new IllegalArgumentException(
-//                    "Visitor already has a booking in this time slot");
-//        }else {
-//            savedVisit = visitRepository.save(visit);
-//        }
-//
-//        return objectMapper.convertValue(savedVisit,VisitDto.class);
-//    }
-
     @Override
     @Transactional
     public VisitDto createVisit(VisitDto visitDto) {
@@ -244,13 +216,11 @@ public class VisitServiceImpl implements VisitService {
     @Override
     @Transactional
     public VisitDto updateVisit(Long id, VisitDto visitDto) {
-        Visit existingVisit = visitRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Visit not found with id: " + id));
+        VisitOption visitOption = visitOptionRepository.findById(visitDto.getVisitOption().getId()).orElseThrow(()->new IllegalArgumentException("attached visit option not available in the database"));
+        Visit visit = visitMapper.toEntity(visitDto);
+        visit.setVisitOption(visitOption);
 
-        // Manual mapping for update
-        Visit visitToBeUpdate = objectMapper.convertValue(visitDto,Visit.class);
-
-        Visit updatedVisit = visitRepository.save(existingVisit);
+        Visit updatedVisit = visitRepository.save(visit);
         return objectMapper.convertValue(updatedVisit, VisitDto.class);
     }
 
