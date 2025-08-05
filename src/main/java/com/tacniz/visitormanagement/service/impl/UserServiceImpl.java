@@ -4,27 +4,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tacniz.visitormanagement.dto.LoginRequest;
 import com.tacniz.visitormanagement.dto.UserDto;
 import com.tacniz.visitormanagement.dto.VisitorReqDto;
+import com.tacniz.visitormanagement.mapper.UserMapper;
 import com.tacniz.visitormanagement.model.Role;
 import com.tacniz.visitormanagement.model.UserEntity;
 import com.tacniz.visitormanagement.repo.UserEntityRepository;
+import com.tacniz.visitormanagement.service.EmailService;
+import com.tacniz.visitormanagement.service.ImageService;
 import com.tacniz.visitormanagement.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-// For the repository interface (if in separate file):
-import org.springframework.stereotype.Repository;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -33,11 +30,16 @@ public class UserServiceImpl implements UserService {
     private final UserEntityRepository userEntityRepository;
     private final ObjectMapper objectMapper;
     private final PasswordEncoder passwordEncoder;
+    private final ImageService imageService;
+    private final EmailService emailService;
+    private final UserMapper userMapper;
+
+
     private final String IMAGE_DIRECTORY = "profilePic/";
     @Override
     public List<UserEntity> getAllUsers() {
         return userEntityRepository.findAll().stream()
-                .peek(user -> user.setImagePath("https://images.ctfassets.net/h6goo9gw1hh6/2sNZtFAWOdP1lmQ33VwRN3/24e953b920a9cd0ff2e1d587742a2472/1-intro-photo-final.jpg?w=1200&h=992&fl=progressive&q=70&fm=jpg")).toList();
+                .toList();
     }
 
     @Override
@@ -68,6 +70,7 @@ public class UserServiceImpl implements UserService {
         user.setIsEmailVerified(false);
         user.setIsPhoneNumberVerified(false);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        emailService.sendFourDigitAuthenticationEmail(user.getEmail());
         return objectMapper.convertValue(userEntityRepository.save(user),UserDto.class);
     }
 
@@ -81,10 +84,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    @Override
-    public ResponseEntity<UserDto> setPhoto(MultipartFile photo, Long visitId) {
-        return null;
-    }
+
 
     @Override
     public UserDto getUserByEmail(String email) {
@@ -121,6 +121,45 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public UserDto saveImage(Long id, MultipartFile image) {
+        UserEntity user = userEntityRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("UserService : image cannot save - user not found in the database"));
+        user  = saveImageInternal(user, image);
+        return convertToDto(user);
+    }
+
+    @Override
+    public ResponseEntity<Resource> getImage(String imageName) {
+        return imageService.getImage(IMAGE_DIRECTORY,imageName);
+    }
+
+    @Override
+    public UserEntity saveImageInternal(UserEntity user, MultipartFile image) {
+        // delete if a image
+        if(user.getImagePath() != null){
+            imageService.deleteImage(IMAGE_DIRECTORY,user.getImagePath());
+        }
+
+        String imagePath = imageService.saveImage(IMAGE_DIRECTORY,user.getId().toString(),image);
+        user.setImagePath(imagePath);
+        return userEntityRepository.save(user);
+    }
+
+    @Override
+    public UserDto getUserById(Long id) {
+        UserEntity user = userEntityRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("user not found in the database"));
+        return (userMapper.toDto(user));
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+        try {
+            userEntityRepository.deleteById(id);
+        }catch (Exception e){
+            throw new IllegalArgumentException("UserService : cannot delete user with sent id");
+        }
+    }
+
 
     // Helper method to convert UserEntity to UserDto
     private UserDto convertToDto(UserEntity user) {
@@ -129,6 +168,7 @@ public class UserServiceImpl implements UserService {
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .email(user.getEmail())
+                .imagePath(user.getImagePath())
                 .phoneNumber(user.getPhoneNumber())
                 .role(user.getRole().toString())
                 .build();

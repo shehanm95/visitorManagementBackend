@@ -3,6 +3,7 @@ package com.tacniz.visitormanagement.dto;
 import com.tacniz.visitormanagement.model.Gate;
 import com.tacniz.visitormanagement.model.UserEntity;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,4 +23,5 @@ public class VisitDto {
     private GateDto enteredGate;
     private GateDto exitGate;
     private LocalDateTime exitTime;
+    private MultipartFile image;
 }

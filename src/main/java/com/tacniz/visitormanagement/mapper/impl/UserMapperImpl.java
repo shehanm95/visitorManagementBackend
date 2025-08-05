@@ -31,6 +31,8 @@ public class UserMapperImpl implements UserMapper {
         if (user == null) return null;
 
         UserDto dto = objectMapper.convertValue(user, UserDto.class);
+        System.out.println("user email verified :" +  user.getIsEmailVerified().toString());
+        dto.setIsEmailVerified(user.getIsEmailVerified());
         dto.setRole(user.getRole() != null ? user.getRole().name() : null);
 
         if (user.getReviewedNotes() != null) {

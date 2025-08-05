@@ -9,6 +9,7 @@ import com.tacniz.visitormanagement.model.Role;
 import com.tacniz.visitormanagement.model.UserEntity;
 import com.tacniz.visitormanagement.repo.UserEntityRepository;
 import com.tacniz.visitormanagement.service.AuthService;
+import com.tacniz.visitormanagement.service.EmailService;
 import com.tacniz.visitormanagement.service.JwtService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -31,6 +32,7 @@ public class AuthServiceImpl  implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final EmailService emailService;
 
     @Transactional
     public TokenPair registerUser(RegisterRequest registerRequest) {
@@ -52,6 +54,7 @@ public class AuthServiceImpl  implements AuthService {
                 .build();
 
         userRepository.save(user);
+        emailService.sendFourDigitAuthenticationEmail(user.getEmail());
         return login(new LoginRequest(registerRequest.getEmail(), registerRequest.getPassword()));
 
     }

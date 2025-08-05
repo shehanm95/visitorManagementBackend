@@ -1,17 +1,16 @@
 package com.tacniz.visitormanagement.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 @Entity
 @Table(name = "email_authentication_obj")
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
-public class EmailAuthenticationObj {
+@AllArgsConstructor
+@NoArgsConstructor
+public class OptObj {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,2 +1,15 @@
-package com.tacniz.visitormanagement.dto;public class OptChecker {
+package com.tacniz.visitormanagement.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Data
+public class OptChecker {
+    private String email;
+    private String digits;
 }

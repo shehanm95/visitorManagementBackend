@@ -69,9 +69,11 @@ public class VisitMapperImpl implements VisitMapper {
         visit.setImageName(dto.getImageName());
         visit.setPrintedDate(dto.getPrintedDate());
         visit.setCanceled(dto.isCanceled());
+        System.out.println("is visit printed : "+ visit.isPrinted());
         visit.setPrinted(dto.isPrinted());
         visit.setRequestedDate(dto.getRequestedDate());
         visit.setExitTime(dto.getExitTime());
+
 
         // Map complex objects with null checks
         if (dto.getVisitOption() != null) {

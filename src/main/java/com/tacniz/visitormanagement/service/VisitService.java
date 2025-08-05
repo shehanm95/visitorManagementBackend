@@ -5,7 +5,8 @@ import com.tacniz.visitormanagement.dto.FullVisitDto;
 import com.tacniz.visitormanagement.dto.IdObject;
 import com.tacniz.visitormanagement.dto.VisitDto;
 import com.tacniz.visitormanagement.dto.VisitRowDto;
-import com.tacniz.visitormanagement.model.VisitOption;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,4 +27,6 @@ public interface VisitService {
     void markAsPrinted(Long id);
 
     VisitDto createPreReg(VisitDto visit);
+
+    ResponseEntity<Resource> getImage(String imageName);
 }

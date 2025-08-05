@@ -1,5 +1,6 @@
 package com.tacniz.visitormanagement.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tacniz.visitormanagement.dto.FullVisitDto;
 import com.tacniz.visitormanagement.dto.VisitDto;
 import com.tacniz.visitormanagement.dto.VisitRowDto;
@@ -8,10 +9,14 @@ import com.tacniz.visitormanagement.model.VisitOption;
 import com.tacniz.visitormanagement.service.VisitService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -24,10 +29,17 @@ import java.util.Map;
 public class VisitController {
 
     private final VisitService visitService;
+    private final ObjectMapper objectMapper;
 
-    @PostMapping
-    public ResponseEntity<VisitDto> createVisit(@RequestBody VisitDto visitDto) {
+
+    @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<VisitDto> createVisit(
+        @RequestPart("visitDto") String visitDtoJson,
+        @RequestPart(value = "image" , required = false) MultipartFile image) throws IOException {
+        VisitDto visitDto = objectMapper.readValue(visitDtoJson, VisitDto.class);
+        visitDto.setImage(image);
         VisitDto createdVisit = visitService.createVisit(visitDto);
+
         return new ResponseEntity<>(createdVisit, HttpStatus.CREATED);
     }
 
@@ -91,5 +103,11 @@ public class VisitController {
     public ResponseEntity<VisitDto>  cratePreReg(@RequestBody VisitDto visit){
         VisitDto createdVisit = visitService.createPreReg(visit);
         return ResponseEntity.ok(createdVisit);
+    }
+
+
+    @GetMapping("/pic/{imageName}")
+    public ResponseEntity<Resource> getImage(@PathVariable String imageName){
+        return visitService.getImage(imageName);
     }
 }

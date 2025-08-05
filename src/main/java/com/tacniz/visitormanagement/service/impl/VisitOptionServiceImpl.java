@@ -1,22 +1,22 @@
 package com.tacniz.visitormanagement.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tacniz.visitormanagement.dto.SpecificDateDto;
 import com.tacniz.visitormanagement.dto.VisitOptionDTO;
 import com.tacniz.visitormanagement.mapper.VisitOptionMapper;
 import com.tacniz.visitormanagement.model.SpecificDate;
 import com.tacniz.visitormanagement.model.TimeRange;
 import com.tacniz.visitormanagement.model.VisitOption;
 import com.tacniz.visitormanagement.model.VisitType;
-import com.tacniz.visitormanagement.repo.TimeRangeRepository;
-import com.tacniz.visitormanagement.repo.UserEntityRepository;
-import com.tacniz.visitormanagement.repo.VisitOptionRepository;
-import com.tacniz.visitormanagement.repo.VisitTypeRepo;
+import com.tacniz.visitormanagement.repo.*;
 import com.tacniz.visitormanagement.service.ImageService;
 import com.tacniz.visitormanagement.service.VisitOptionService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -39,6 +39,10 @@ public class VisitOptionServiceImpl implements VisitOptionService {
     private final UserEntityRepository userEntityRepository;
     private final String IMAGE_DIRECTORY  = "visitOptionCovers/";
     private final TimeRangeRepository timeRangeRepository;
+
+    @Autowired
+    @Lazy
+    private final SpecificDateRepo specificDateRepo;
 
     @Override
     @Transactional
@@ -105,7 +109,11 @@ public class VisitOptionServiceImpl implements VisitOptionService {
     public VisitOptionDTO getVisitOptionById(Long id) {
         VisitOption visitOption = visitOptionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("VisitOption not found with id: " + id));
-        return objectMapper.convertValue(visitOption, VisitOptionDTO.class);
+
+        VisitOptionDTO visitOptionDTO = objectMapper.convertValue(visitOption, VisitOptionDTO.class);
+        List<SpecificDateDto> specificDates = specificDateRepo.findAllByVisitOptionId(visitOption.getId()).stream().map(s->objectMapper.convertValue(s, SpecificDateDto.class)).toList();
+        visitOptionDTO.setSpecificDates(specificDates);
+        return visitOptionDTO;
     }
 
     @Override
@@ -127,10 +135,13 @@ public class VisitOptionServiceImpl implements VisitOptionService {
         VisitOption visitOption = visitOptionRepository.findById(visitOptionDTO.getId())
                 .orElseThrow(() -> new IllegalArgumentException("VisitOption not found with id: " + visitOptionDTO.getId()));
 
-        VisitType visitType = visitTypeRepository.findById(visitOptionDTO.getVisitType().getId())
+        VisitType visitType = visitOptionRepository.findVisitTypeByVisitOptionId(visitOptionDTO.getId())
                 .orElseThrow(() -> new IllegalArgumentException("VisitType not found with id: " + visitOptionDTO.getVisitType().getId()));
 
-        visitOption = visitOptionMapper.toEntity(visitOptionDTO);
+        System.out.println("Visit Type : " + visitType);
+        visitOptionMapper.updateVisitOptionFromDto(visitOptionDTO, visitOption);
+        visitOption.setVisitType(visitType);
+
 
         // Handle updated cover image if provided
         if (visitOptionDTO.getImage() != null && !visitOptionDTO.getImage().isEmpty()) {

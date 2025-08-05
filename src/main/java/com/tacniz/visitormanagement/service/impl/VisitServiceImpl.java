@@ -5,12 +5,17 @@ import com.tacniz.visitormanagement.dto.FullVisitDto;
 import com.tacniz.visitormanagement.dto.IdObject;
 import com.tacniz.visitormanagement.dto.VisitDto;
 import com.tacniz.visitormanagement.dto.VisitRowDto;
-import com.tacniz.visitormanagement.mapper.FullVisitMapper;
 import com.tacniz.visitormanagement.mapper.VisitMapper;
 import com.tacniz.visitormanagement.model.*;
 import com.tacniz.visitormanagement.repo.*;
+import com.tacniz.visitormanagement.service.ImageService;
+import com.tacniz.visitormanagement.service.UserService;
 import com.tacniz.visitormanagement.service.VisitService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +24,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,6 +37,13 @@ public class VisitServiceImpl implements VisitService {
     private final TimeRangeRepository timeRangeRepository;
     private final VisitMapper visitMapper;
     private final ButtonAnswerRepository buttonAnswerRepository;
+    private final ImageService imageService;
+
+    @Autowired
+    @Lazy
+    private UserService userService;
+
+    private final String IMAGE_DIRECTORY_NAME = "visit/";
 
     @Override
     @Transactional
@@ -93,10 +104,24 @@ public class VisitServiceImpl implements VisitService {
             }
         }
 
+
+
         // Add visit to row
         availableRow.getVisits().add(visit);
         visit.setVisitRow(availableRow);
         visit.setPrintedDate(null);
+        visit = visitRepository.save(visit);
+        //adding savedImagePath;
+        if(visitDto.getImage() != null){
+            String savedImagePath = imageService.saveImage(IMAGE_DIRECTORY_NAME, visit.getId().toString(), visitDto.getImage());
+            System.out.println("image name : " + savedImagePath);
+            visit.setImageName(savedImagePath);
+        }
+
+        // saving visitor image if visitor USER_ENTITY doesn't have a image;
+        if(visitDto.getImage() != null && visit.getVisitor().getImagePath() == null || visit.getVisitor().getImagePath().isEmpty()){
+            userService.saveImageInternal(visit.getVisitor(), visitDto.getImage());
+        }
         visit = visitRepository.save(visit);
         return visitMapper.toDto(visit);
     }
@@ -105,7 +130,7 @@ public class VisitServiceImpl implements VisitService {
     private List<VisitRow> createVisitRowsForDate(LocalDate date, VisitOption visitOption) {
         List<VisitRow> allSavedRows = new ArrayList<>();
         int averageTime = visitOption.getAverageTimeForAPerson();
-        final int BATCH_SIZE = 50; // Process 50 at a time
+        final int BATCH_SIZE = 50;
 
         for(TimeRange timeRange : visitOption.getTimeRanges()) {
             List<VisitRow> batchRows = new ArrayList<>();
@@ -135,8 +160,8 @@ public class VisitServiceImpl implements VisitService {
                 if(batchRows.size() >= BATCH_SIZE) {
                     List<VisitRow> savedBatch = visitRowRepo.saveAll(batchRows);
                     allSavedRows.addAll(savedBatch);
-                    batchRows.clear(); // Free memory immediately
-                    System.gc(); // Suggest garbage collection
+                    batchRows.clear();
+                    System.gc();
                 }
 
                 currentMinutes += averageTime;
@@ -172,18 +197,6 @@ public class VisitServiceImpl implements VisitService {
         if(visitOption.getTimeRanges() == null || visitOption.getTimeRanges().isEmpty())
             throw new IllegalArgumentException("In VisitOption, time ranges cannot be null or empty to get visit rows");
 
-//        if(visitOption.getVisitDateType() == VisitDateType.SPECIFIC_DATES){
-//            boolean includes = false;
-//            for(SpecificDate d :visitOption.getSpecificDates()){
-//                if(d.getDate() == date) {
-//                    includes = true;
-//                    break;
-//                }
-//            };
-//            if(!includes) {
-//                throw new IllegalArgumentException("visitDate must me include in the specific visit dates");
-//            }
-//        }
 
         List<VisitRow> visitRows = visitRowRepo.findByVisitOptionIdAndDate(visitOption.getId(),date);
         if(visitRows.isEmpty()){
@@ -209,6 +222,7 @@ public class VisitServiceImpl implements VisitService {
     public FullVisitDto getVisitById(Long id) {
         Visit visit = visitRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Visit not found with id: " + id));
+
         return visitMapper.toFullVisitDto(visit);
 
     }
@@ -217,7 +231,9 @@ public class VisitServiceImpl implements VisitService {
     @Transactional
     public VisitDto updateVisit(Long id, VisitDto visitDto) {
         VisitOption visitOption = visitOptionRepository.findById(visitDto.getVisitOption().getId()).orElseThrow(()->new IllegalArgumentException("attached visit option not available in the database"));
+        System.out.println("visit Row : " + visitDto.getVisitRow());
         Visit visit = visitMapper.toEntity(visitDto);
+
         visit.setVisitOption(visitOption);
 
         Visit updatedVisit = visitRepository.save(visit);
@@ -266,6 +282,7 @@ public class VisitServiceImpl implements VisitService {
         Visit visit = visitRepository.findById(id).orElseThrow(()->new IllegalArgumentException("requested visit is not exist in the database"));
         visit.setPrinted(true);
         visitRepository.save(visit);
+
     }
 
     @Override
@@ -279,6 +296,11 @@ public class VisitServiceImpl implements VisitService {
         Visit createVisit = visitRepository.save(visitToBeCreate);
         visitRowRepo.save(visitRow);
         return objectMapper.convertValue(createVisit,VisitDto.class);
+    }
+
+    @Override
+    public ResponseEntity<Resource> getImage(String imageName) {
+        return imageService.getImage(IMAGE_DIRECTORY_NAME,imageName);
     }
 
     private List<Visit> getByVisitOptionId(Long id){

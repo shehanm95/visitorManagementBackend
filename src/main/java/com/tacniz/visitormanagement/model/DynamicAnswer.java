@@ -30,7 +30,7 @@ public class DynamicAnswer {
 
     private String value;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.ALL})
     @JoinTable(
             name = "dynamic_answer_button_answers",
             joinColumns = @JoinColumn(name = "dynamic_answer_id"),

@@ -69,4 +69,43 @@ public class VisitOptionMapperImpl implements VisitOptionMapper {
     public IdVisitOptionObject toIdObject(VisitOption visitOption) {
         return  objectMapper.convertValue(visitOption, IdVisitOptionObject.class);
     }
+
+    public void updateVisitOptionFromDto(VisitOptionDTO dto, VisitOption entity) {
+        if (dto.getVisitOptionName() != null) {
+            entity.setVisitOptionName(dto.getVisitOptionName());
+        }
+        if (dto.getDescription() != null) {
+            entity.setDescription(dto.getDescription());
+        }
+        if (dto.getIsPreRegistration() != null) {
+            entity.setIsPreRegistration(dto.getIsPreRegistration());
+        }
+        if (dto.getImageName() != null) {
+            entity.setImageName(dto.getImageName());
+        }
+        if (dto.getIsPhotoRequired() != null) {
+            entity.setIsPhotoRequired(dto.getIsPhotoRequired());
+        }
+        if (dto.getIsPhotoOptional() != null) {
+            entity.setIsPhotoOptional(dto.getIsPhotoOptional());
+        }
+        if (dto.getIsPhoneNumberRequired() != null) {
+            entity.setIsPhoneNumberRequired(dto.getIsPhoneNumberRequired());
+        }
+        if (dto.getIsEmailRequired() != null) {
+            entity.setIsEmailRequired(dto.getIsEmailRequired());
+        }
+
+        entity.setAverageTimeForAPerson(dto.getAverageTimeForAPerson());
+        entity.setVisitorsPerRow(dto.getVisitorsPerRow());
+
+        if (dto.getVisitDateType() != null) {
+            entity.setVisitDateType(dto.getVisitDateType());
+        }
+
+        entity.setActive(dto.isActive());
+
+        // You can add more fields if needed, like lists (timeRanges, dynamicQuestions, etc.)
+    }
+
 }
