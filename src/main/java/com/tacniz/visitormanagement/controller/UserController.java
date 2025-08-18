@@ -2,13 +2,13 @@ package com.tacniz.visitormanagement.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tacniz.visitormanagement.dto.LoginRequest;
+import com.tacniz.visitormanagement.dto.RegisterRequest;
 import com.tacniz.visitormanagement.dto.UserDto;
 import com.tacniz.visitormanagement.dto.VisitorReqDto;
 import com.tacniz.visitormanagement.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -46,8 +46,8 @@ public class UserController {
     }
 
     @PutMapping("/edit")
-    public ResponseEntity<UserDto> ChangeRole(@RequestBody UserDto userDto) {
-        return ResponseEntity.ok(objectMapper.convertValue(userService.changeRole(userDto),UserDto.class));
+    public ResponseEntity<UserDto> editUser(@RequestBody RegisterRequest userDto) {
+        return ResponseEntity.ok(objectMapper.convertValue(userService.editUser(userDto),UserDto.class));
     }
 
     @PostMapping("/addVisitor")

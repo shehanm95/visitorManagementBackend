@@ -99,4 +99,9 @@ public class DynamicQuestionMapperImpl implements DynamicQuestionMapper {
     public List<DynamicQuestionDTO> toDtoList(List<DynamicQuestion> officerQuestions) {
         return officerQuestions.stream().map(this::toDto).toList();
     }
+
+    @Override
+    public void updateEntityFromDto(DynamicQuestionDTO updatedQuestion, DynamicQuestion existing) {
+
+    }
 }

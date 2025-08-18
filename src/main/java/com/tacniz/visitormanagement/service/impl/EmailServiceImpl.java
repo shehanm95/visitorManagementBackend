@@ -1,12 +1,11 @@
 package com.tacniz.visitormanagement.service.impl;
 
 import com.tacniz.visitormanagement.dto.OptChecker;
-import com.tacniz.visitormanagement.model.OptObj;
+import com.tacniz.visitormanagement.model.OTPObj;
 import com.tacniz.visitormanagement.model.UserEntity;
 import com.tacniz.visitormanagement.repo.OPTRepo;
 import com.tacniz.visitormanagement.repo.UserEntityRepository;
 import com.tacniz.visitormanagement.service.EmailService;
-import com.tacniz.visitormanagement.service.UserService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.transaction.Transactional;
@@ -15,6 +14,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Random;
@@ -42,6 +42,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     @Transactional
+    @Async
     public void sendFourDigitAuthenticationEmail(String toEmail) {
         if(toEmail == null || toEmail.isEmpty() || toEmail.isBlank()){throw new IllegalArgumentException("EmailService: must provide a valid Email");}
         String digits = generateRandom4DigitString();
@@ -65,7 +66,7 @@ public class EmailServiceImpl implements EmailService {
     @Transactional
     public boolean checkOpt(OptChecker optChecker) {
         if(optRepo.findByEmail(optChecker.getEmail()).isPresent()){
-            OptObj optObj = optRepo.findByEmail(optChecker.getEmail()).get();
+            OTPObj optObj = optRepo.findByEmail(optChecker.getEmail()).get();
             if(optObj.getDigits().equals(optChecker.getDigits())){
                 optRepo.deleteByEmail(optChecker.getEmail());
                 UserEntity userEntity = userEntityRepository.findByEmail(optChecker.getEmail()).orElseThrow(()-> new IllegalArgumentException("User not Exist in the database with this Email"));
@@ -83,7 +84,7 @@ public class EmailServiceImpl implements EmailService {
         if(optRepo.findByEmail(toEmail).isPresent()){
             optRepo.deleteByEmail(toEmail);
         }
-        OptObj optObj = OptObj.builder()
+        OTPObj optObj = OTPObj.builder()
                 .email(toEmail)
                 .digits(digits)
                 .build();

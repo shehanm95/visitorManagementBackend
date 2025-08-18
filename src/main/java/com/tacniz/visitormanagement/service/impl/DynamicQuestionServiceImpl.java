@@ -18,7 +18,6 @@ public class DynamicQuestionServiceImpl implements DynamicQuestionService {
 
 
     private final DynamicQuestionRepository repository;
-    private final ObjectMapper objectMapper;
 
 
     private final DynamicQuestionMapper mapper;
@@ -46,11 +45,12 @@ public class DynamicQuestionServiceImpl implements DynamicQuestionService {
 
     @Override
     public DynamicQuestionDTO updateQuestion(DynamicQuestionDTO updatedQuestion) {
-       if(updatedQuestion.getId() == null) throw new IllegalArgumentException("id not exist in the Dynamic Question");
-       DynamicQuestion dynamicQuestion = repository.findById(updatedQuestion.getId()).orElseThrow(()-> new IllegalArgumentException("Dynamic Question not found in the database"));
-       dynamicQuestion = mapper.toEntity(updatedQuestion);
-       return mapper.toDto(repository.save(dynamicQuestion));
+        if(updatedQuestion.getId() == null) throw new IllegalArgumentException("id not exist in the Dynamic Question");
+        DynamicQuestion dynamicQuestion = repository.findById(updatedQuestion.getId()).orElseThrow(()-> new IllegalArgumentException("Dynamic Question not found in the database"));
+        dynamicQuestion = mapper.toEntity(updatedQuestion);
+        return mapper.toDto(repository.save(dynamicQuestion));
     }
+
 
     @Override
     public void deleteQuestion(Long id) {

@@ -1,10 +1,7 @@
 package com.tacniz.visitormanagement.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tacniz.visitormanagement.dto.FullVisitDto;
-import com.tacniz.visitormanagement.dto.VisitDto;
-import com.tacniz.visitormanagement.dto.VisitRowDto;
-import com.tacniz.visitormanagement.dto.VisitRowReq;
+import com.tacniz.visitormanagement.dto.*;
 import com.tacniz.visitormanagement.model.VisitOption;
 import com.tacniz.visitormanagement.service.VisitService;
 import jakarta.validation.Valid;
@@ -53,6 +50,7 @@ public class VisitController {
 
     @PutMapping("/{id}")
     public ResponseEntity<VisitDto> updateVisit(@PathVariable Long id, @RequestBody VisitDto visitDto) {
+        System.out.println("dynamic answers : " + visitDto.getDynamicAnswers().size());
         VisitDto updatedVisit = visitService.updateVisit(id, visitDto);
         return ResponseEntity.ok(updatedVisit);
     }
@@ -75,9 +73,10 @@ public class VisitController {
         return ResponseEntity.ok(visits);
     }
 
-    @GetMapping("/all")
-    public  ResponseEntity<List<VisitDto>> getAll(){
-        return ResponseEntity.ok(visitService.getAll());
+    @GetMapping("/all/{pageLimit}/{page}")
+    public  ResponseEntity<List<VisitDto>> getAll( @PathVariable Integer pageLimit, @PathVariable Integer page){
+        if(page == null || pageLimit == null) throw new IllegalArgumentException("VisitController : page number cannot be null");
+        return ResponseEntity.ok(visitService.getAll(pageLimit,page));
     }
 
     @GetMapping("/getByRowId/{id}")
@@ -110,4 +109,17 @@ public class VisitController {
     public ResponseEntity<Resource> getImage(@PathVariable String imageName){
         return visitService.getImage(imageName);
     }
+
+    @PostMapping("/getVisitsBySearchObj/{pageLimit}/{page}")
+    public ResponseEntity<List<VisitDto>> getVisitsBySearchObj(@RequestBody VisitSearchObject searchObject, @PathVariable Integer pageLimit,@PathVariable Integer page){
+            return ResponseEntity.ok(visitService.getVisitsBySearchObj( searchObject, pageLimit, page));
+    }
+
+    @PostMapping("/cancelVisit/{id}")
+    public ResponseEntity<VisitDto> cancelVisit(@PathVariable Long id){
+        if(id == null) throw new IllegalArgumentException(("VisitController : visit id cannot Be null To Cancel"));
+        return ResponseEntity.ok(visitService.cancelVisit(id));
+    }
+
+
 }

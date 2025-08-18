@@ -61,7 +61,8 @@ public class VisitOption {
     private int averageTimeForAPerson;
     private int visitorsPerRow;
 
-    private boolean isActive;
+    @Column(name = "isActive")
+    private Boolean isActive;
 
     @OneToMany(mappedBy = "visitOption", fetch = FetchType.LAZY)
     @ToString.Exclude

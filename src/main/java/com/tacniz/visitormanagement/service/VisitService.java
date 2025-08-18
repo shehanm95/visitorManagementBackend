@@ -1,10 +1,7 @@
 package com.tacniz.visitormanagement.service;
 
 
-import com.tacniz.visitormanagement.dto.FullVisitDto;
-import com.tacniz.visitormanagement.dto.IdObject;
-import com.tacniz.visitormanagement.dto.VisitDto;
-import com.tacniz.visitormanagement.dto.VisitRowDto;
+import com.tacniz.visitormanagement.dto.*;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
@@ -19,7 +16,7 @@ public interface VisitService {
     List<VisitDto> getVisitsByVisitOptionId(Long visitOptionId);
     List<VisitDto> getVisitsByVisitorUserId(Long visitorUserId);
 
-    List<VisitDto> getAll();
+    List<VisitDto> getAll(Integer PageLimit, Integer page);
     List<VisitRowDto> getVisitRowsForDate(LocalDate date, IdObject visitOption);
 
     List<VisitDto> getByRowId(Long id);
@@ -29,4 +26,8 @@ public interface VisitService {
     VisitDto createPreReg(VisitDto visit);
 
     ResponseEntity<Resource> getImage(String imageName);
+
+    List<VisitDto> getVisitsBySearchObj(VisitSearchObject searchObject, Integer pageLimit, Integer page);
+
+    VisitDto cancelVisit(Long id);
 }

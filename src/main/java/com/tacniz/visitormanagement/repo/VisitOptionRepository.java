@@ -15,4 +15,16 @@ public interface VisitOptionRepository extends JpaRepository<VisitOption, Long> 
     List<VisitOption> findByVisitTypeIdAndIsPreRegistrationTrueAndIsActiveTrue(Long visitTypeId);
     @Query("SELECT vo.visitType FROM VisitOption vo WHERE vo.id = :id")
     Optional<VisitType> findVisitTypeByVisitOptionId(@Param("id") Long id);
+
+    @Query("""
+SELECT DISTINCT vo.visitType 
+FROM VisitOption vo 
+WHERE vo.isPreRegistration = TRUE 
+AND vo.isActive = TRUE
+AND vo.isPreRegistration IS NOT NULL 
+AND vo.isActive IS NOT NULL
+""")
+    List<VisitType> findVisitTypesWithPreRegistrationAndActive();
+
+
 }

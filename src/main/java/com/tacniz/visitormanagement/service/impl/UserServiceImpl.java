@@ -2,6 +2,7 @@ package com.tacniz.visitormanagement.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tacniz.visitormanagement.dto.LoginRequest;
+import com.tacniz.visitormanagement.dto.RegisterRequest;
 import com.tacniz.visitormanagement.dto.UserDto;
 import com.tacniz.visitormanagement.dto.VisitorReqDto;
 import com.tacniz.visitormanagement.mapper.UserMapper;
@@ -43,20 +44,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserEntity changeRole(UserDto userDto) {
-        return userEntityRepository.findById(userDto.getId())
-                .map(user -> {
-                    UserEntity convertedUser = objectMapper.convertValue(userDto, UserEntity.class);
-                    if(!userDto.getEmail().equals(user.getEmail())){
-                        if(userEntityRepository.existsByEmail(userDto.getEmail())){
-                            throw new IllegalArgumentException("New email address you entered is already exist.");
-                        }
-                    }
-
-                    convertedUser.setPassword(user.getPassword());
-                    return userEntityRepository.save(convertedUser);
-                })
-                .orElseThrow(() -> new IllegalArgumentException("User doesn't exist in the database"));
+    public UserEntity editUser(RegisterRequest userDto) {
+        UserEntity user = userEntityRepository.findById(userDto.getId()).orElseThrow(()->new IllegalArgumentException("UserService : User not found in the database"));
+        if(!userDto.getEmail().equals(user.getEmail())){
+           user.setIsEmailVerified(false);
+        }
+        if(userDto.getPassword() != null && !userDto.getPassword().isEmpty()){
+            userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        }
+        userMapper.mapToUser(user,userDto);
+        return userEntityRepository.save(user);
     }
 
     @Override
@@ -70,9 +67,16 @@ public class UserServiceImpl implements UserService {
         user.setIsEmailVerified(false);
         user.setIsPhoneNumberVerified(false);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        emailService.sendFourDigitAuthenticationEmail(user.getEmail());
-        return objectMapper.convertValue(userEntityRepository.save(user),UserDto.class);
+
+        // Save first
+        UserEntity savedUser = userEntityRepository.save(user);
+
+        // Then send email
+        emailService.sendFourDigitAuthenticationEmail(savedUser.getEmail());
+
+        return objectMapper.convertValue(savedUser, UserDto.class);
     }
+
 
     @Override
     public UserDto loginVisitor(LoginRequest loginRequest) {
@@ -136,6 +140,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserEntity saveImageInternal(UserEntity user, MultipartFile image) {
         // delete if a image
+
         if(user.getImagePath() != null){
             imageService.deleteImage(IMAGE_DIRECTORY,user.getImagePath());
         }
@@ -159,7 +164,6 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("UserService : cannot delete user with sent id");
         }
     }
-
 
     // Helper method to convert UserEntity to UserDto
     private UserDto convertToDto(UserEntity user) {

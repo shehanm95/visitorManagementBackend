@@ -32,12 +32,12 @@ public class UserDto {
     @Email(message = "Invalid email format")
     private String email;
 
-    private Boolean isEmailVerified;
+    private Boolean isEmailVerified =false;
 
     @NotBlank(message = "Phone number is required")
     private String phoneNumber;
 
-    private Boolean isPhoneNumberVerified; // Added to match schema
+    private Boolean isPhoneNumberVerified =false; // Added to match schema
 
     private String role;
 

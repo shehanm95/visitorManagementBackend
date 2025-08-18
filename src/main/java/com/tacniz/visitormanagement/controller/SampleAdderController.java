@@ -26,7 +26,6 @@ public class SampleAdderController {
     private final VisitTypeService visitTypeService;
     private final VisitOptionService visitOptionService;
     private final DynamicQuestionService dynamicQuestionService;
-    private final AppointmentService appointmentService;
 
 
 
@@ -36,33 +35,6 @@ public class SampleAdderController {
         craeteVisittype();
         createVisitOption();
     }
-
-    @GetMapping("/future")
-    public ResponseEntity<List<Appointment>> getFutureAppointments() {
-        return ResponseEntity.ok(appointmentService.getAllFutureAppointments());
-    }
-
-    @GetMapping("/future-from")
-    public ResponseEntity<List<Appointment>> getFutureAppointmentsFrom(
-            @RequestParam LocalDateTime from) {
-        return ResponseEntity.ok(appointmentService.getFutureAppointmentsFrom(from));
-    }
-
-    @GetMapping("/future-from-date")
-    public ResponseEntity<List<Appointment>> getFutureAppointmentsFromDate(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDate) {
-        List<Appointment> appointments = appointmentService.getFutureAppointmentsFromDate(fromDate);
-        return ResponseEntity.ok(appointments);
-    }
-
-    @PostMapping("/bulk")
-    public ResponseEntity<List<Appointment>> createBulkAppointments(
-        @RequestBody List<Appointment> request) {
-        List<Appointment> savedAppointments =
-                appointmentService.saveAllAppointments(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedAppointments);
-    }
-
 
     private void createVisitOption() {
         // Create button answers for multiple choice questions

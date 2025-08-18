@@ -7,6 +7,8 @@ import com.tacniz.visitormanagement.model.VisitType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class VisitTypeMapperImpl implements VisitTypeMapper {
@@ -19,6 +21,11 @@ public class VisitTypeMapperImpl implements VisitTypeMapper {
 
     @Override
     public VisitType toEntity(VisitTypeDTO visitType) {
-        return null;
+        return objectMapper.convertValue(visitType, VisitType.class);
+    }
+
+    @Override
+    public List<VisitTypeDTO> toDtoList(List<VisitType> visitTypes) {
+        return visitTypes.stream().map(this::toDto).toList();
     }
 }

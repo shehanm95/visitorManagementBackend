@@ -1,15 +1,19 @@
 package com.tacniz.visitormanagement.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tacniz.visitormanagement.controller.VisitOptionController;
 import com.tacniz.visitormanagement.dto.VisitTypeDTO;
 import com.tacniz.visitormanagement.mapper.VisitTypeMapper;
 import com.tacniz.visitormanagement.model.VisitType;
+import com.tacniz.visitormanagement.repo.VisitOptionRepository;
 import com.tacniz.visitormanagement.repo.VisitTypeRepo;
 import com.tacniz.visitormanagement.service.ImageService;
 import com.tacniz.visitormanagement.service.VisitTypeService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -17,7 +21,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,6 +36,9 @@ public class VisitTypeServiceImpl implements VisitTypeService {
     private final ImageService imageService;
     private final VisitTypeMapper visitTypeMapper;
 
+    @Autowired
+    @Lazy
+    private VisitOptionRepository visitOptionRepository;
 
 
     private final String MAIN_DIRECTORY = "visitTypeCovers/";
@@ -85,17 +94,19 @@ public class VisitTypeServiceImpl implements VisitTypeService {
         return objectMapper.convertValue(visitTypeRepository.save(visitTypeEntity),VisitTypeDTO.class);
     }
 
-    @Override
-    public void deleteVisitType(Long id) {
-        VisitType visitType = visitTypeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("VisitType not found with id: " + id));
-
-        // Delete image file
-        String imageName = visitType.getImageName().substring(visitType.getImageName().lastIndexOf("\\."));
-        imageService.deleteImage(MAIN_DIRECTORY,imageName);
-
-        visitTypeRepository.delete(visitType);
-    }
+//    @Override
+//    public void deleteVisitType(Long id) {
+//        VisitType visitType = visitTypeRepository.findById(id)
+//                .orElseThrow(() -> new RuntimeException("VisitType not found with id: " + id));
+//
+//        // Delete image file
+//       if(visitType.getImageName() != null && !visitType.getImageName().isEmpty()){
+//           String imageName = visitType.getImageName().substring(visitType.getImageName().lastIndexOf("\\."));
+//           imageService.deleteImage(MAIN_DIRECTORY,imageName);
+//       }
+//
+//        visitTypeRepository.delete(visitType);
+//    }
 
     @Override
     public VisitType deleteCover(String filename) {
@@ -122,13 +133,7 @@ public class VisitTypeServiceImpl implements VisitTypeService {
 
     @Override
     public List<VisitTypeDTO> getVisitTypesWithPreRegistration() {
-        return visitTypeRepository.findVisitTypesWithPreRegistrationOptions()
-                .stream()
-                .map(t->{
-                    VisitTypeDTO typeDTO= objectMapper.convertValue(t,VisitTypeDTO.class);
-                    typeDTO.setVisitOptions(new ArrayList<>());
-                    return typeDTO;
-                })
-                .collect(Collectors.toList());
+        List<VisitType> visitTypes = visitOptionRepository.findVisitTypesWithPreRegistrationAndActive();
+        return visitTypeMapper.toDtoList(visitTypes);
     }
 }

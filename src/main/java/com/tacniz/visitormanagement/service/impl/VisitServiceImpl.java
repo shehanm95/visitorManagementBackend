@@ -1,10 +1,7 @@
 package com.tacniz.visitormanagement.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tacniz.visitormanagement.dto.FullVisitDto;
-import com.tacniz.visitormanagement.dto.IdObject;
-import com.tacniz.visitormanagement.dto.VisitDto;
-import com.tacniz.visitormanagement.dto.VisitRowDto;
+import com.tacniz.visitormanagement.dto.*;
 import com.tacniz.visitormanagement.mapper.VisitMapper;
 import com.tacniz.visitormanagement.model.*;
 import com.tacniz.visitormanagement.repo.*;
@@ -15,9 +12,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -38,6 +38,7 @@ public class VisitServiceImpl implements VisitService {
     private final VisitMapper visitMapper;
     private final ButtonAnswerRepository buttonAnswerRepository;
     private final ImageService imageService;
+    private final UserEntityRepository userEntityRepository;
 
     @Autowired
     @Lazy
@@ -51,6 +52,7 @@ public class VisitServiceImpl implements VisitService {
 
         VisitOption visitOption = visitOptionRepository.findById(visitDto.getVisitOption().getId()).orElseThrow(()->new IllegalArgumentException("attached visit option not available in the database"));
         Visit visit = visitMapper.toEntity(visitDto);
+        visit.setVisitor(userEntityRepository.findById(visitDto.getVisitor().getId()).orElseThrow(()->new IllegalArgumentException("VisitService : Visitor not fount in the database.")));
         //visit.getDynamicAnswers().forEach(da->da.getSelectedButtonAnswers().forEach(ba->ba.addDynamicAnswer(da)));
         System.out.println("visit mapped");
         visit.getDynamicAnswers().forEach(da -> {
@@ -88,7 +90,8 @@ public class VisitServiceImpl implements VisitService {
             allInPast = false; // At least one row has a valid time
 
             // Check if the row has space
-            if (row.getVisits().size() < row.getVisitorsPerRow()) {
+            List<Visit> activeVisits = row.getVisits().stream().filter(v->!v.isCanceled()).toList();
+            if (activeVisits.size() < row.getVisitorsPerRow()) {
                 availableRow = row;
                 break;
             }
@@ -119,7 +122,7 @@ public class VisitServiceImpl implements VisitService {
         }
 
         // saving visitor image if visitor USER_ENTITY doesn't have a image;
-        if(visitDto.getImage() != null && visit.getVisitor().getImagePath() == null || visit.getVisitor().getImagePath().isEmpty()){
+        if(visitDto.getImage() != null && visit.getVisitor().getImagePath() == null){
             userService.saveImageInternal(visit.getVisitor(), visitDto.getImage());
         }
         visit = visitRepository.save(visit);
@@ -240,12 +243,17 @@ public class VisitServiceImpl implements VisitService {
         return objectMapper.convertValue(updatedVisit, VisitDto.class);
     }
 
-    @Override
-    public void deleteVisit(Long id) {
-        if (!visitRepository.existsById(id)) {
-            throw new IllegalArgumentException("Visit not found with id: " + id);
-        }
-        visitRepository.deleteById(id);
+    @Transactional
+    public void deleteVisit(Long visitId) {
+        Visit visit = visitRepository.findById(visitId)
+                .orElseThrow(() -> new IllegalArgumentException("Visit not found"));
+
+        // Disassociate all dynamic answers from this visit
+        visit.getDynamicAnswers().forEach(answer -> answer.setVisit(null));
+        visit.setDynamicAnswers(new ArrayList<>());
+
+        // Now it's safe to delete the visit
+        visitRepository.delete(visit);
     }
 
     @Override
@@ -263,8 +271,8 @@ public class VisitServiceImpl implements VisitService {
     }
 
     @Override
-    public List<VisitDto> getAll() {
-        return visitRepository.findAll()
+    public List<VisitDto> getAll(Integer pageLimit, Integer page) {
+        return visitRepository.findAll(PageRequest.of(page,pageLimit))
                 .stream()
                 .map(v->objectMapper.convertValue(v,VisitDto.class))
                 .toList();
@@ -288,7 +296,8 @@ public class VisitServiceImpl implements VisitService {
     @Override
     public VisitDto createPreReg(VisitDto visit) {
         VisitRow visitRow = visitRowRepo.findById(visit.getVisitRow().getId()).orElseThrow(()->new IllegalArgumentException("VisitRow not exist in the database"));
-        if(visitRow.getVisitorsPerRow() < visitRow.getVisits().size()){
+        List<Visit> activeVisits = visitRow.getVisits().stream().filter(v->!v.isCanceled()).toList();
+        if(visitRow.getVisitorsPerRow() < activeVisits.size()){
             throw new IllegalArgumentException("Sorry The visit row just now filed before you");
         }
         Visit visitToBeCreate = objectMapper.convertValue(visit,Visit.class);
@@ -302,6 +311,59 @@ public class VisitServiceImpl implements VisitService {
     public ResponseEntity<Resource> getImage(String imageName) {
         return imageService.getImage(IMAGE_DIRECTORY_NAME,imageName);
     }
+
+    @Override
+    public List<VisitDto> getVisitsBySearchObj(VisitSearchObject searchObject, Integer pageLimit, Integer page) {
+        Pageable pageable = PageRequest.of(page, pageLimit);
+
+        // Convert LocalDate to LocalDateTime for the query
+        LocalDateTime startDateTime = searchObject.getStartDate() != null ?
+                searchObject.getStartDate().atStartOfDay() : null;
+        LocalDateTime endDateTime = searchObject.getEndDate() != null ?
+                searchObject.getEndDate().atTime(23, 59, 59) : null;
+
+        Page<Visit> visitsPage = visitRepository.findBySearchCriteria(
+                searchObject.getVisitType(),
+                searchObject.getVisitOption(),
+                startDateTime,
+                endDateTime,
+                pageable
+        );
+
+        return visitsPage.getContent().stream()
+                .map(visitMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public VisitDto cancelVisit(Long id) {
+        Visit visit = visitRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("VisitService : visit not Found In the Database"));
+
+        // Combine date and time into LocalDateTime
+        LocalDateTime visitDateTime = LocalDateTime.of(
+                visit.getVisitRow().getDate(),
+                visit.getVisitRow().getStartTime()
+        );
+
+        if(visit.isCanceled())throw new IllegalArgumentException("VisitService : visit is already canceled");
+        if (visitDateTime.isBefore(LocalDateTime.now()))throw new IllegalArgumentException("VisitService : visit time already passed");
+
+        visit.setCanceled(true);
+//        VisitRow visitRow = visit.getVisitRow();
+//        visitRow.removeVisit(visit);
+//        VisitRow fakeRow = VisitRow.builder()
+//                .date(visitRow.getDate())
+//                .startTime(visitRow.getStartTime())
+//                .endTime(visitRow.getEndTime()).build();
+//
+//        fakeRow.addVisit(visit);
+//
+//
+//        visitRowRepo.save(visitRow);
+//        visitRowRepo.save(fakeRow);
+        return visitMapper.toDto(visitRepository.save(visit));
+    }
+
 
     private List<Visit> getByVisitOptionId(Long id){
         return visitRepository.findByVisitOptionId(id);

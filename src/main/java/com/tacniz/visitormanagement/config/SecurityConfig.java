@@ -56,8 +56,8 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(
                         req -> req
-                                .requestMatchers("/api/auth/**").permitAll()
-                                .anyRequest().permitAll()
+                                .requestMatchers("/api/auth/**" ,"/api/visit-types/allPreRegTypes" ).permitAll()
+                                .anyRequest().authenticated()
                 )
                 .sessionManagement(
                         session -> session

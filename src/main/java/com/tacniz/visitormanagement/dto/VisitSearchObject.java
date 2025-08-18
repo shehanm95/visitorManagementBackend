@@ -18,5 +18,9 @@ public class VisitSearchObject {
     private VisitOption visitOption;
     private LocalDate  startDate ;
     private LocalDate  endDate ;
+
+    public boolean hasDateRange() {
+        return startDate != null && endDate != null;
+    }
 }
 

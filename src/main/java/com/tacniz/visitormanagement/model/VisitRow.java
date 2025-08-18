@@ -48,6 +48,7 @@ public class VisitRow {
 
 
     public void addVisit(Visit visit) {
+        if(this.visits == null) this.visits = new ArrayList<>();
         visits.add(visit);
         visit.setVisitRow(this);
     }
@@ -55,5 +56,10 @@ public class VisitRow {
     public void removeVisit(Visit visit) {
         visits.remove(visit);
         visit.setVisitRow(null);
+    }
+
+    public void removeVisitFromRow(Visit visit) {
+        visits.remove(visit);
+
     }
 }

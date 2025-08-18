@@ -10,4 +10,6 @@ public interface DynamicQuestionMapper {
     DynamicQuestionDTO toDto(DynamicQuestion entity);
 
     List<DynamicQuestionDTO> toDtoList(List<DynamicQuestion> officerQuestions);
+
+    void updateEntityFromDto(DynamicQuestionDTO updatedQuestion, DynamicQuestion existing);
 }

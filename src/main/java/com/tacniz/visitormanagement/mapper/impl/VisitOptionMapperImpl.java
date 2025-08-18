@@ -103,7 +103,7 @@ public class VisitOptionMapperImpl implements VisitOptionMapper {
             entity.setVisitDateType(dto.getVisitDateType());
         }
 
-        entity.setActive(dto.isActive());
+        entity.setIsActive(dto.isActive());
 
         // You can add more fields if needed, like lists (timeRanges, dynamicQuestions, etc.)
     }

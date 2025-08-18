@@ -1,6 +1,7 @@
 package com.tacniz.visitormanagement.mapper.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tacniz.visitormanagement.dto.RegisterRequest;
 import com.tacniz.visitormanagement.dto.UserDto;
 import com.tacniz.visitormanagement.model.UserEntity;
 import com.tacniz.visitormanagement.mapper.UserMapper;
@@ -31,7 +32,6 @@ public class UserMapperImpl implements UserMapper {
         if (user == null) return null;
 
         UserDto dto = objectMapper.convertValue(user, UserDto.class);
-        System.out.println("user email verified :" +  user.getIsEmailVerified().toString());
         dto.setIsEmailVerified(user.getIsEmailVerified());
         dto.setRole(user.getRole() != null ? user.getRole().name() : null);
 
@@ -77,4 +77,27 @@ public class UserMapperImpl implements UserMapper {
         if (dtos == null) return null;
         return dtos.stream().map(this::toEntity).collect(Collectors.toList());
     }
+
+    @Override
+    public void mapToUser(UserEntity user, RegisterRequest userDto) {
+        if (userDto.getFirstName() != null) {
+            user.setFirstName(userDto.getFirstName());
+        }
+        if (userDto.getLastName() != null) {
+            user.setLastName(userDto.getLastName());
+        }
+        if (userDto.getEmail() != null) {
+            user.setEmail(userDto.getEmail());
+        }
+        if (userDto.getPhoneNumber() != null) {
+            user.setPhoneNumber(userDto.getPhoneNumber());
+        }
+        if (userDto.getPassword() != null) {
+            user.setPassword(userDto.getPassword());
+        }
+        if (userDto.getRole() != null) {
+            user.setRole(userDto.getRole());
+        }
+    }
+
 }

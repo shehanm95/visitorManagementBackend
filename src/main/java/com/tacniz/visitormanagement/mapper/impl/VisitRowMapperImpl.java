@@ -9,6 +9,8 @@ import com.tacniz.visitormanagement.repo.VisitRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+
 @Service
 @RequiredArgsConstructor
 public class VisitRowMapperImpl implements VisitRowMapper {
@@ -51,10 +53,7 @@ public class VisitRowMapperImpl implements VisitRowMapper {
         visitRowDto.setVisitorsPerRow(visitRow.getVisitorsPerRow());
 
         // Map visits using the existing logic
-        visitRowDto.setVisits(visitRepository.findByVisitRowId(visitRow.getId())
-                .stream()
-                .map(v -> objectMapper.convertValue(v, VisitDto.class))
-                .toList());
+        visitRowDto.setVisits(new ArrayList<>());
 
         // Note: timeRange and visitOption are not set here as they're @JsonIgnore in the entity
         // They should be handled separately if needed

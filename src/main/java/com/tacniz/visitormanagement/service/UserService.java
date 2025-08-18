@@ -1,6 +1,7 @@
 package com.tacniz.visitormanagement.service;
 
 import com.tacniz.visitormanagement.dto.LoginRequest;
+import com.tacniz.visitormanagement.dto.RegisterRequest;
 import com.tacniz.visitormanagement.dto.UserDto;
 import com.tacniz.visitormanagement.dto.VisitorReqDto;
 import com.tacniz.visitormanagement.model.UserEntity;
@@ -12,9 +13,10 @@ import java.util.List;
 
 
 public interface UserService {
+
     List<UserEntity> getAllUsers();
 
-    UserEntity changeRole(UserDto userDto);
+    UserEntity editUser(RegisterRequest userDto);
 
     UserDto addVisitor(VisitorReqDto visitorReqDto);
 

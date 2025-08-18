@@ -30,7 +30,7 @@ public class Visit {
 
     private String imageName;
 
-    @OneToMany(mappedBy = "visit", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "visit", cascade = CascadeType.ALL, orphanRemoval = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<DynamicAnswer> dynamicAnswers = new ArrayList<>();

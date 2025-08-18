@@ -2,7 +2,6 @@ package com.tacniz.visitormanagement.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tacniz.visitormanagement.dto.VisitTypeDTO;
-import com.tacniz.visitormanagement.service.ImageService;
 import com.tacniz.visitormanagement.service.VisitTypeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -65,11 +64,11 @@ public class VisitTypeController {
     }
 
     // Delete
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteVisitType(@PathVariable Long id) {
-        visitTypeService.deleteVisitType(id);
-        return ResponseEntity.noContent().build();
-    }
+//    @DeleteMapping("/{id}")
+//    public ResponseEntity<Void> deleteVisitType(@PathVariable Long id) {
+//        visitTypeService.deleteVisitType(id);
+//        return ResponseEntity.noContent().build();
+//    }
 
     // Get Image
     @GetMapping("/cover/{filename}")
@@ -93,7 +92,7 @@ public class VisitTypeController {
         };
     }
 
-    @GetMapping("/visitTypesWithPreRegistration")
+    @GetMapping("/allPreRegTypes")
     public ResponseEntity<List<VisitTypeDTO>> getVisitTypesWithPreRegistration(){
         return ResponseEntity.ok(visitTypeService.getVisitTypesWithPreRegistration());
     }

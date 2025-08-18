@@ -52,6 +52,7 @@ public class VisitMapperImpl implements VisitMapper {
         dto.setVisitRow(visitRowMapper.toDto(visit.getVisitRow()));
         dto.setEnteredGate(gateMapper.toDto(visit.getEnteredGate()));
         dto.setExitGate(gateMapper.toDto(visit.getExitGate()));
+        dto.setCanceled(visit.isCanceled());
 
         return dto;
     }

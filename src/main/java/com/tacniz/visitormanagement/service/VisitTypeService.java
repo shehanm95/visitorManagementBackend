@@ -18,7 +18,7 @@ public interface VisitTypeService {
 
     VisitTypeDTO updateVisitType(VisitTypeDTO visitTypeDTO) throws IOException;
 
-    void deleteVisitType(Long id);
+//    void deleteVisitType(Long id);
 
     VisitType deleteCover(String filename);
 

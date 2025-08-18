@@ -63,6 +63,8 @@ public class VisitOptionServiceImpl implements VisitOptionService {
 
         // Convert and set basic properties
         VisitOption visitOption = objectMapper.convertValue(visitOptionDTO, VisitOption.class);
+        visitOption.setIsActive(visitOptionDTO.isActive());
+        System.out.println("visit Option :" + visitOption.getIsActive());
         visitOption.setVisitType(visitType);
         visitOption.setDynamicQuestions(new ArrayList<>());
 
@@ -102,7 +104,9 @@ public class VisitOptionServiceImpl implements VisitOptionService {
             savedVisitOption = visitOptionRepository.save(savedVisitOption);
         }
 
-        return objectMapper.convertValue(savedVisitOption, VisitOptionDTO.class);
+        VisitOptionDTO savedVisitOptionDto =  objectMapper.convertValue(savedVisitOption, VisitOptionDTO.class);
+        savedVisitOptionDto.setActive(savedVisitOption.getIsActive());
+        return savedVisitOptionDto;
     }
 
     @Override
