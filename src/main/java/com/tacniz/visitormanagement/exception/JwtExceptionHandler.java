@@ -5,6 +5,7 @@ import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.ZonedDateTime;
@@ -33,6 +34,18 @@ public class JwtExceptionHandler {
     @ExceptionHandler(JwtException.class)
     public ResponseEntity<?> handleJwtException(JwtException ex) {
         log.error("Invalid JWT token: {}", ex.getMessage());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("error", "InvalidToken");
+        response.put("message", "JWT token is invalid or malformed");
+        response.put("timestamp", ZonedDateTime.now());
+
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED); // 401
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<?> UsernameNotFoundException(UsernameNotFoundException ex) {
+        log.error("UserName Not Found: {}", ex.getMessage());
 
         Map<String, Object> response = new HashMap<>();
         response.put("error", "InvalidToken");

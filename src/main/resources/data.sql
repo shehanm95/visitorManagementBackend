@@ -4,7 +4,7 @@ INSERT INTO user_entity (
 )
 SELECT
     1, 'Zincat', 'Admin', 'admin@zincat.com', true,
-    '1234567890', true, '$2a$10$sF4h16I9s4YSm/w9RzQjeeLvdfbJNYxENkFZ5IlqMH.i44DkRwLSG', 'ROLE_MODERATOR'
+    '1234567890', true, '$2a$10$sF4h16I9s4YSm/w9RzQjeeLvdfbJNYxENkFZ5IlqMH.i44DkRwLSG', 'ROLE_ADMIN'
 WHERE NOT EXISTS (
     SELECT 1 FROM user_entity WHERE id = 1 OR email = 'admin@zincat.com'
 );
